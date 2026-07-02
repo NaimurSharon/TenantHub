@@ -191,14 +191,13 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
 
         {/* Actions */}
         <View style={styles.actions}>
-          <Button
-            variant="outline"
-            size="default"
+          <TouchableOpacity
             onPress={handleReset}
-            style={{ flex: 1, marginRight: 10 }}
+            style={styles.resetBtn}
+            activeOpacity={0.75}
           >
-            Reset
-          </Button>
+            <Text style={styles.resetBtnText}>Reset</Text>
+          </TouchableOpacity>
           <Button
             variant="default"
             size="default"
@@ -292,5 +291,19 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
+    gap: 12,
+  },
+  resetBtn: {
+    flex: 1,
+    height: 48,
+    borderRadius: radii.lg,
+    backgroundColor: colors.destructiveLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  resetBtnText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 15,
+    color: colors.destructive,
   },
 });
