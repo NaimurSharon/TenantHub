@@ -222,7 +222,7 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "transparent",
+    backgroundColor: "rgba(0,0,0,0.1)",
   },
   sheet: {
     position: "absolute",
