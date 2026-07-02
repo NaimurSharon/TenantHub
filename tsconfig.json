@@ -25,7 +25,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "nativewind-env.d.ts"
+    "src/global.d.ts"
   ],
   "exclude": [
     "node_modules"

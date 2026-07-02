@@ -15,7 +15,7 @@ import { Text } from "@/components/ui/Text";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react-native";
-import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
+
 import * as Haptics from "expo-haptics";
 import { colors, fonts, radii, shadows, spacing } from "@/theme";
 import {
@@ -92,11 +92,7 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
       statusBarTranslucent
     >
       <Pressable style={styles.backdrop} onPress={onClose} />
-      <Animated.View
-        entering={SlideInDown.duration(250)}
-        exiting={SlideOutDown.duration(200)}
-        style={styles.sheet}
-      >
+      <View style={styles.sheet}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Filters</Text>
@@ -207,7 +203,7 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
             Apply
           </Button>
         </View>
-      </Animated.View>
+      </View>
     </Modal>
   );
 }

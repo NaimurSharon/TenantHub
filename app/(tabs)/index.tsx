@@ -25,12 +25,7 @@ import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Search, SlidersHorizontal, X, Plus, LogOut } from "lucide-react-native";
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInRight,
-  SlideOutRight,
-} from "react-native-reanimated";
+
 import * as Haptics from "expo-haptics";
 
 import { colors, fonts, radii, shadows, spacing } from "@/theme";
@@ -143,9 +138,7 @@ export default function TenantsScreen() {
       {/* ── Search & Filter Row ────────────────────────────── */}
       <View style={styles.actionRow}>
         {searchVisible ? (
-          <Animated.View
-            entering={SlideInRight.duration(200)}
-            exiting={SlideOutRight.duration(150)}
+          <View
             style={styles.searchBar}
           >
             <Search size={18} color={colors.mutedForeground} />
@@ -163,11 +156,9 @@ export default function TenantsScreen() {
             <Pressable onPress={toggleSearch} hitSlop={8}>
               <X size={18} color={colors.mutedForeground} />
             </Pressable>
-          </Animated.View>
+          </View>
         ) : (
-          <Animated.View
-            entering={FadeIn.duration(150)}
-            exiting={FadeOut.duration(100)}
+          <View
             style={styles.iconRow}
           >
             <View style={{ flex: 1 }} />
@@ -181,7 +172,7 @@ export default function TenantsScreen() {
               />
               {hasFilters && <View style={styles.filterDot} />}
             </Pressable>
-          </Animated.View>
+          </View>
         )}
       </View>
 

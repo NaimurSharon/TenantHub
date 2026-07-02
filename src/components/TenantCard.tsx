@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { MoreHorizontal } from "lucide-react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
+
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import { colors, fonts, radii, shadows } from "@/theme";
@@ -80,7 +80,7 @@ export function TenantCard({ tenant }: TenantCardProps) {
   };
 
   return (
-    <Animated.View entering={FadeIn.duration(200)} style={styles.card}>
+    <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.name} numberOfLines={1}>
           {tenant.name}
@@ -106,7 +106,7 @@ export function TenantCard({ tenant }: TenantCardProps) {
           </Text>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

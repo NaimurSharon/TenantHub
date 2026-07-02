@@ -1,16 +1,10 @@
 /**
  * Animated segmented control — Active / Inactive toggle.
- * Uses Reanimated for a smooth sliding indicator and haptic feedback on tap.
+ * Uses RN Animated for a smooth sliding indicator and haptic feedback on tap.
  */
-import React, { useEffect } from "react";
-import { View, Pressable, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import { Text } from "@/components/ui/Text";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { colors, fonts, radii, shadows } from "@/theme";
 import { useFilterStore } from "@/store/useFilterStore";
@@ -25,18 +19,16 @@ export function StatusToggle() {
   const status = useFilterStore((s) => s.status);
   const setStatus = useFilterStore((s) => s.setStatus);
 
-  const progress = useSharedValue(status === "active" ? 0 : 1);
+  const progress = useRef(new Animated.Value(status === "active" ? 0 : 1)).current;
 
   useEffect(() => {
-    progress.value = withTiming(status === "active" ? 0 : 1, {
+    Animated.timing(progress, {
+      toValue: status === "active" ? 0 : 1,
       duration: 220,
       easing: Easing.out(Easing.quad),
-    });
+      useNativeDriver: true,
+    }).start();
   }, [status]);
-
-  const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: progress.value * (PILL_WIDTH / 2) }],
-  }));
 
   const handlePress = (key: TenantStatus) => {
     if (key === status) return;
@@ -44,10 +36,15 @@ export function StatusToggle() {
     setStatus(key);
   };
 
+  const translateX = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, PILL_WIDTH / 2],
+  });
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.track}>
-        <Animated.View style={[styles.indicator, indicatorStyle]} />
+        <Animated.View style={[styles.indicator, { transform: [{ translateX }] }]} />
         {SEGMENTS.map((seg) => (
           <Pressable
             key={seg.key}
