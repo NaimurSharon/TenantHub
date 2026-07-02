@@ -10,7 +10,10 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/Text";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -43,6 +46,7 @@ const ORDER_OPTIONS: { key: SortOrder; label: string }[] = [
 
 export function FilterSheet({ visible, onClose }: FilterSheetProps) {
   const store = useFilterStore();
+  const insets = useSafeAreaInsets();
 
   // Local state so changes aren't applied until "Apply"
   const [unit, setUnit] = useState(store.unit);
@@ -87,12 +91,16 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
     <Modal
       visible={visible}
       transparent
-      animationType="none"
+      animationType="slide"
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      <Pressable style={styles.backdrop} onPress={onClose} />
-      <View style={styles.sheet}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <Pressable style={styles.backdrop} onPress={onClose} />
+        <View style={[styles.sheet, { paddingBottom: insets.bottom + 8 }]}>
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Filters</Text>
@@ -103,7 +111,9 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          contentContainerStyle={{ paddingBottom: 8 }}
         >
           {/* Unit */}
           <Input
@@ -203,7 +213,8 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
             Apply
           </Button>
         </View>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -223,7 +234,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
     paddingTop: 16,
-    maxHeight: "75%",
+    maxHeight: "90%",
     ...shadows.medium,
   },
   header: {
