@@ -11,13 +11,14 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  TextInput,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-  ChevronLeft,
   Phone,
   Mail,
   Building2,
@@ -87,16 +88,10 @@ export default function TenantHubScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.backBtn}>
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {hubData?.header?.display_name ?? tenant?.name ?? "Tenant Hub"}
-        </Text>
-        <View style={{ width: 36 }} />
-      </View>
+      <ScreenHeader
+        title={hubData?.header?.display_name ?? tenant?.name ?? "Tenant Hub"}
+        onBack={() => router.back()}
+      />
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
@@ -253,7 +248,7 @@ export default function TenantHubScreen() {
 function TabLoader() {
   return (
     <View style={styles.emptyTab}>
-      <ActivityIndicator size="small" color="#2563EB" />
+      <ActivityIndicator size="small" color={colors.primary} />
       <Text style={[styles.emptyText, { marginTop: 8 }]}>Loading records...</Text>
     </View>
   );
@@ -361,26 +356,26 @@ function ContactsTab({
           <Text style={styles.formTitle}>
             {editingContact ? "Edit Contact" : "New Contact"}
           </Text>
-          <FormField
+          <Input
             label="Name"
             value={form.contact_name}
             onChangeText={(v) => setForm({ ...form, contact_name: v })}
             placeholder="Contact name"
           />
-          <FormField
+          <Input
             label="Designation"
             value={form.designation ?? ""}
             onChangeText={(v) => setForm({ ...form, designation: v })}
             placeholder="e.g. Manager"
           />
-          <FormField
+          <Input
             label="Email"
             value={form.email ?? ""}
             onChangeText={(v) => setForm({ ...form, email: v })}
             placeholder="email@example.com"
             keyboardType="email-address"
           />
-          <FormField
+          <Input
             label="Mobile"
             value={form.mobile ?? ""}
             onChangeText={(v) => setForm({ ...form, mobile: v })}
@@ -388,22 +383,19 @@ function ContactsTab({
             keyboardType="phone-pad"
           />
           <View style={styles.formActions}>
-            <Pressable onPress={resetForm} style={styles.cancelBtn}>
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </Pressable>
-            <Pressable
+            <Button variant="outline" size="sm" onPress={resetForm} style={{ flex: 1, marginRight: 8 }}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
               onPress={handleSubmit}
-              style={styles.submitBtn}
+              loading={createMutation.isPending || updateMutation.isPending}
               disabled={createMutation.isPending || updateMutation.isPending}
+              style={{ flex: 1 }}
             >
-              {(createMutation.isPending || updateMutation.isPending) ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <Text style={styles.submitBtnText}>
-                  {editingContact ? "Update" : "Create"}
-                </Text>
-              )}
-            </Pressable>
+              {editingContact ? "Update" : "Create"}
+            </Button>
           </View>
         </View>
       )}
@@ -560,51 +552,8 @@ function ProfileTab({ tenant, summary }: { tenant: any; summary?: any }) {
   );
 }
 
-/* ── Form Field Helper ───────────────────────────────── */
-function FormField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  keyboardType,
-}: {
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  placeholder?: string;
-  keyboardType?: any;
-}) {
-  return (
-    <View style={styles.formField}>
-      <Text style={styles.formLabel}>{label}</Text>
-      <TextInput
-        style={styles.formInput}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={colors.mutedForeground}
-        keyboardType={keyboardType}
-      />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-  },
-  backBtn: { padding: 4 },
-  headerTitle: {
-    flex: 1,
-    fontFamily: fonts.bold,
-    fontSize: 18,
-    color: colors.foreground,
-    textAlign: "center",
-  },
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
 
   // Summary Card
@@ -761,36 +710,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   formTitle: { fontFamily: fonts.bold, fontSize: 16, color: colors.foreground, marginBottom: 14 },
-  formField: { marginBottom: 12 },
-  formLabel: { fontFamily: fonts.medium, fontSize: 12, color: colors.foregroundSoft, marginBottom: 4 },
-  formInput: {
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    color: colors.foreground,
-    backgroundColor: colors.input,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.inputBorder,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
   formActions: { flexDirection: "row", gap: 10, marginTop: 8 },
-  cancelBtn: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: radii.md,
-    backgroundColor: colors.secondary,
-  },
-  cancelBtnText: { fontFamily: fonts.medium, fontSize: 14, color: colors.foregroundSoft },
-  submitBtn: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 12,
-    borderRadius: radii.md,
-    backgroundColor: colors.primary,
-  },
-  submitBtnText: { fontFamily: fonts.semiBold, fontSize: 14, color: "#FFF" },
 
   // Profile
   profileContainer: {

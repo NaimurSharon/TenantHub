@@ -5,7 +5,8 @@
  *   Row 2: Company (left, gray)|   unit value      |   balance value (green)
  */
 import React from "react";
-import { Pressable, View, Text, StyleSheet, Alert } from "react-native";
+import { Pressable, View, StyleSheet, Alert } from "react-native";
+import { Text } from "@/components/ui/Text";
 import { colors, fonts } from "@/theme";
 import type { Tenant } from "@/lib/api/types";
 import { formatCurrency } from "@/lib/api/types";
@@ -22,7 +23,7 @@ interface TenantRowProps {
 const UNIT_WIDTH = 72;
 const BALANCE_WIDTH = 88;
 
-export function TenantRow({ tenant, selected, onPress }: TenantRowProps) {
+export const TenantRow = React.memo(function TenantRow({ tenant, selected, onPress }: TenantRowProps) {
   const deleteMutation = useDeleteTenant();
 
   const handlePress = () => {
@@ -92,7 +93,7 @@ export function TenantRow({ tenant, selected, onPress }: TenantRowProps) {
       </View>
     </Pressable>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

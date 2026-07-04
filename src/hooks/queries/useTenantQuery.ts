@@ -3,6 +3,7 @@
  */
 import { useQuery, useInfiniteQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { api } from "@/lib/api";
 import { useFilterStore } from "@/store/useFilterStore";
 import type { TenantFilters, Tenant } from "@/lib/api/types";
@@ -18,13 +19,17 @@ export const tenantKeys = {
 
 /** Paginated tenant list with infinite scroll. */
 export function useTenants() {
-  const status = useFilterStore((s) => s.status);
-  const search = useFilterStore((s) => s.search);
-  const unit = useFilterStore((s) => s.unit);
-  const balanceMin = useFilterStore((s) => s.balanceMin);
-  const balanceMax = useFilterStore((s) => s.balanceMax);
-  const sortBy = useFilterStore((s) => s.sortBy);
-  const sortOrder = useFilterStore((s) => s.sortOrder);
+  const { status, search, unit, balanceMin, balanceMax, sortBy, sortOrder } = useFilterStore(
+    useShallow((s) => ({
+      status: s.status,
+      search: s.search,
+      unit: s.unit,
+      balanceMin: s.balanceMin,
+      balanceMax: s.balanceMax,
+      sortBy: s.sortBy,
+      sortOrder: s.sortOrder,
+    }))
+  );
 
   const queryFilters = { status, search: search || undefined };
 

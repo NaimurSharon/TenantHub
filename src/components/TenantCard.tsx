@@ -26,7 +26,7 @@ interface TenantCardProps {
   tenant: Tenant;
 }
 
-export function TenantCard({ tenant }: TenantCardProps) {
+export const TenantCard = React.memo(function TenantCard({ tenant }: TenantCardProps) {
   const router = useRouter();
   const deleteMutation = useDeleteTenant();
 
@@ -108,7 +108,7 @@ export function TenantCard({ tenant }: TenantCardProps) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: {

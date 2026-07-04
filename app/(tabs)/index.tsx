@@ -114,6 +114,10 @@ export default function TenantsScreen() {
 
   const keyExtractor = useCallback((item: Tenant) => String(item.id), []);
 
+  const handleEndReached = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
   // ── Render ─────────────────────────────────────────────────
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -197,9 +201,7 @@ export default function TenantsScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40, paddingTop: 8 }}
           ItemSeparatorComponent={() => null}
-          onEndReached={() => {
-            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-          }}
+          onEndReached={handleEndReached}
           onEndReachedThreshold={0.5}
           refreshControl={
             <RefreshControl

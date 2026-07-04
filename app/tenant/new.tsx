@@ -17,11 +17,11 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ChevronLeft } from "lucide-react-native";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 
-import { colors, fonts, radii, shadows } from "@/theme";
+import { colors, fonts, radii } from "@/theme";
 import { useCreateTenant } from "@/hooks/queries/useTenantQuery";
 import { createTenantSchema } from "@/lib/validation";
 
@@ -118,17 +118,11 @@ export default function AddTenantScreen() {
       style={styles.screen}
     >
       {/* Header */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={12}
-          style={styles.backBtn}
-        >
-          <ChevronLeft size={24} color={colors.foreground} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Add New Tenant</Text>
-        <View style={{ width: 32 }} />
-      </View>
+      <ScreenHeader
+        title="Add New Tenant"
+        onBack={() => router.back()}
+        style={{ paddingTop: insets.top + 8 }}
+      />
 
       <ScrollView
         contentContainerStyle={styles.form}
@@ -242,25 +236,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: colors.surface,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-    ...shadows.soft,
-  },
-  backBtn: {
-    padding: 4,
-  },
-  headerTitle: {
-    fontFamily: fonts.bold,
-    fontSize: 18,
-    color: colors.foreground,
   },
   form: {
     padding: 20,
