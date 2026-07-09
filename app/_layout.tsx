@@ -31,7 +31,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated && !inAuthGroup) {
       router.replace("/login");
     } else if (isAuthenticated && inAuthGroup) {
-      router.replace("/(tabs)");
+      router.replace("/hub-selector");
     }
   }, [isAuthenticated, segments]);
 
@@ -74,6 +74,9 @@ export default function RootLayout() {
                 }}
               >
                 <Stack.Screen name="login" options={{ animation: "fade" }} />
+                <Stack.Screen name="hub-selector" options={{ animation: "fade" }} />
+                <Stack.Screen name="financial-hub" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="daily-reports" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen
                   name="tenant/[id]"

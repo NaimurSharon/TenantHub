@@ -170,4 +170,26 @@ export const api = {
       return res.data ?? [];
     },
   },
+
+  financial: {
+    listAccounts: async (isActive: boolean) => {
+      const res = await apiRequest<{ data: { bank_accounts: any[] } }>("/setting/bank-accounts", {
+        query: { is_active: isActive ? 1 : 0 },
+      });
+      return res.data?.bank_accounts ?? [];
+    },
+    getAccountDetail: async (accountId: number) => {
+      const res = await apiRequest<{ data: { bank_account: any } }>(`/setting/bank-accounts/${accountId}`);
+      return res.data?.bank_account ?? null;
+    },
+  },
+
+  reports: {
+    getDailyReport: async (date: string, propertyId: number) => {
+      const res = await apiRequest<{ data: any }>("/reports/daily-report", {
+        query: { date, property_id: propertyId },
+      });
+      return res.data ?? null;
+    },
+  },
 };

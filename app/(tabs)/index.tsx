@@ -24,7 +24,7 @@ import {
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Search, SlidersHorizontal, X, Plus, LogOut } from "lucide-react-native";
+import { Search, SlidersHorizontal, X, Plus, ArrowLeft } from "lucide-react-native";
 
 import * as Haptics from "expo-haptics";
 
@@ -88,14 +88,9 @@ export default function TenantsScreen() {
     router.push("/tenant/new");
   };
 
-  const handleLogout = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setLoggingOut(true);
-    try {
-      await api.auth.logout();
-    } catch {}
-    useAuthStore.getState().logout();
-    router.replace("/login");
+  const handleBackToSelector = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.replace("/hub-selector");
   };
 
   const renderItem = useCallback(
@@ -123,12 +118,8 @@ export default function TenantsScreen() {
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* ── Header ─────────────────────────────────────────── */}
       <View style={styles.header}>
-        <Pressable onPress={handleLogout} disabled={loggingOut} hitSlop={12} style={styles.logoutBtn}>
-          {loggingOut ? (
-            <ActivityIndicator size="small" color={colors.mutedForeground} />
-          ) : (
-            <LogOut size={20} color={colors.mutedForeground} />
-          )}
+        <Pressable onPress={handleBackToSelector} hitSlop={12} style={styles.logoutBtn}>
+          <ArrowLeft size={20} color={colors.mutedForeground} />
         </Pressable>
         <Text style={styles.headerTitle}>TENANT HUB</Text>
         <Pressable onPress={handleAddNew} hitSlop={12} style={styles.addNewHeaderBtn}>
