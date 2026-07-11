@@ -5,6 +5,7 @@ import {
   Pressable,
   ActivityIndicator,
   ScrollView,
+  useWindowDimensions,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,6 +25,8 @@ import { api } from "@/lib/api";
 export default function HubSelectorScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useSafeNavigation();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   const [loggingOut, setLoggingOut] = useState(false);
   const user = useAuthStore((s) => s.user);
 
@@ -75,11 +78,12 @@ export default function HubSelectorScreen() {
         </View>
 
         {/* Hub Cards */}
-        <View style={styles.cardsContainer}>
+        <View style={[styles.cardsContainer, isTablet && styles.cardsContainerTablet]}>
           {/* Card 1: Tenant Hub */}
           <Pressable
             style={({ pressed }) => [
               styles.hubCard,
+              isTablet && styles.hubCardTablet,
               pressed && styles.hubCardPressed,
               { borderLeftColor: colors.primary },
             ]}
@@ -101,6 +105,7 @@ export default function HubSelectorScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.hubCard,
+              isTablet && styles.hubCardTablet,
               pressed && styles.hubCardPressed,
               { borderLeftColor: "#F59E0B" },
             ]}
@@ -122,6 +127,7 @@ export default function HubSelectorScreen() {
           <Pressable
             style={({ pressed }) => [
               styles.hubCard,
+              isTablet && styles.hubCardTablet,
               pressed && styles.hubCardPressed,
               { borderLeftColor: "#10B981" },
             ]}
@@ -199,6 +205,14 @@ const styles = StyleSheet.create({
   cardsContainer: {
     gap: 16,
   },
+  cardsContainerTablet: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 16,
+    maxWidth: 900,
+    alignSelf: "center",
+  },
   hubCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -207,6 +221,10 @@ const styles = StyleSheet.create({
     padding: 18,
     borderLeftWidth: 4,
     ...shadows.card,
+  },
+  hubCardTablet: {
+    width: 270,
+    minHeight: 140,
   },
   hubCardPressed: {
     opacity: 0.9,

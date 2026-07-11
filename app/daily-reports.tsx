@@ -44,7 +44,7 @@ export default function DailyReportsScreen() {
   const propertyId = useAuthStore((s) => s.propertyId);
 
   // ── Scroll & Tab Management ──────────────────────────────────
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(2026, 6, 8)); // 8 July 2026
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState<ActiveReportTab>("balances");
   const scrollViewRef = useRef<ScrollView>(null);
   const calendarPickerRef = useRef<CalendarPickerRef>(null);

@@ -20,6 +20,7 @@ import {
   RefreshControl,
   Keyboard,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,10 +40,13 @@ import { useFilterStore } from "@/store/useFilterStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
 import type { Tenant } from "@/lib/api/types";
+import { TenantDetailView } from "@/components/TenantDetailView";
 
 export default function TenantsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useSafeNavigation();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
 
   // ── State ──────────────────────────────────────────────────
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -98,11 +102,13 @@ export default function TenantsScreen() {
         selected={item.id === selectedTenant?.id}
         onPress={() => {
           setSelectedId(item.id);
-          navigation.push(`/tenant/${item.id}`);
+          if (!isTablet) {
+            navigation.push(`/tenant/${item.id}`);
+          }
         }}
       />
     ),
-    [selectedTenant?.id, navigation],
+    [selectedTenant?.id, navigation, isTablet],
   );
 
   const keyExtractor = useCallback((item: Tenant) => String(item.id), []);
@@ -112,8 +118,8 @@ export default function TenantsScreen() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // ── Render ─────────────────────────────────────────────────
-  return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+  const renderSidebar = () => (
+    <View style={isTablet ? styles.sidebar : { flex: 1 }}>
       {/* ── Header ─────────────────────────────────────────── */}
       <View style={styles.header}>
         <Pressable onPress={handleBackToSelector} hitSlop={12} style={styles.logoutBtn}>
@@ -131,9 +137,7 @@ export default function TenantsScreen() {
       {/* ── Search & Filter Row ────────────────────────────── */}
       <View style={styles.actionRow}>
         {searchVisible ? (
-          <View
-            style={styles.searchBar}
-          >
+          <View style={styles.searchBar}>
             <Search size={18} color={colors.mutedForeground} />
             <TextInput
               ref={searchRef}
@@ -151,9 +155,7 @@ export default function TenantsScreen() {
             </Pressable>
           </View>
         ) : (
-          <View
-            style={styles.iconRow}
-          >
+          <View style={styles.iconRow}>
             <View style={{ flex: 1 }} />
             <Pressable onPress={toggleSearch} hitSlop={12} style={styles.iconBtn}>
               <Search size={21} color={colors.foregroundSoft} />
@@ -201,7 +203,7 @@ export default function TenantsScreen() {
             />
           }
           ListHeaderComponent={
-            selectedTenant ? <TenantCard tenant={selectedTenant} /> : null
+            (!isTablet && selectedTenant) ? <TenantCard tenant={selectedTenant} /> : null
           }
           ListFooterComponent={
             isFetchingNextPage ? (
@@ -211,6 +213,35 @@ export default function TenantsScreen() {
             ) : null
           }
         />
+      )}
+    </View>
+  );
+
+  const renderDetail = () => {
+    const activeTenantId = selectedId || tenants[0]?.id;
+    if (!activeTenantId) {
+      return (
+        <View style={styles.detailPlaceholder}>
+          <Text style={styles.placeholderTxt}>Select a tenant to view details</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.detailPane}>
+        <TenantDetailView customerId={activeTenantId} isTablet={true} />
+      </View>
+    );
+  };
+
+  return (
+    <View style={[styles.screen, { paddingTop: insets.top }]}>
+      {isTablet ? (
+        <View style={styles.splitLayout}>
+          {renderSidebar()}
+          {renderDetail()}
+        </View>
+      ) : (
+        renderSidebar()
       )}
 
       {/* ── Filter Sheet ────────────────────────────────────── */}
@@ -301,5 +332,30 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semiBold,
     fontSize: 15,
     color: colors.primary,
+  },
+  splitLayout: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  sidebar: {
+    flex: 1.2,
+    borderRightWidth: 1,
+    borderRightColor: colors.border,
+    backgroundColor: colors.background,
+  },
+  detailPane: {
+    flex: 2,
+    backgroundColor: colors.background,
+  },
+  detailPlaceholder: {
+    flex: 2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.background,
+  },
+  placeholderTxt: {
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.mutedForeground,
   },
 });
