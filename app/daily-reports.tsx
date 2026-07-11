@@ -154,13 +154,13 @@ export default function DailyReportsScreen() {
           <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 20 }} />
         ) : (
           <View style={isTablet ? styles.summaryGridTablet : styles.summaryGridMobile}>
-            <ReportSummaryCard
+            {/* <ReportSummaryCard
               title="Invoice Amount"
               amount={summary.invoice_amount}
               countText={`${summary.invoice_count} Invoices`}
               icon={<FileText size={20} color={colors.primary} />}
               accentColor={colors.primary}
-            />
+            /> */}
             <ReportSummaryCard
               title="Receipt Amount"
               amount={summary.receipt_amount}

@@ -73,9 +73,9 @@ export default function LoginScreen() {
         {/* Branding */}
         <View style={styles.branding}>
           <View style={styles.logo}>
-            <Text style={styles.logoText}>TH</Text>
+            <Text style={styles.logoText}>KT</Text>
           </View>
-          <Text style={styles.appName}>TENANT HUB</Text>
+          <Text style={styles.appName}>KADER TOWER</Text>
           <Text style={styles.tagline}>Property Management System</Text>
         </View>
 

@@ -49,7 +49,7 @@ export default function HubSelectorScreen() {
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>WORKSPACE ROUTER</Text>
+        <Text style={styles.headerTitle}>KADER TOWER</Text>
         <Pressable
           onPress={handleLogout}
           disabled={loggingOut}
@@ -93,7 +93,7 @@ export default function HubSelectorScreen() {
               <Building size={24} color={colors.primary} />
             </View>
             <View style={styles.cardDetails}>
-              <Text style={styles.cardTitle}>Tenant Hub</Text>
+              <Text style={styles.cardTitle}>Tenants</Text>
               <Text style={styles.cardDesc}>
                 Manage tenants, active leases, units, and billing documents
               </Text>
