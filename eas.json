@@ -1,4 +1,4 @@
-{
+w{
   "cli": {
     "version": ">= 20.0.0",
     "appVersionSource": "remote"
@@ -33,17 +33,12 @@
   "submit": {
     "production": {
       "ios": {
-        "appleTeamId": "REPLACE_WITH_TEAM_ID",
-        "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
         "appleId": "REPLACE_WITH_APPLE_ID_EMAIL",
-        "language": "en-US",
-        "categories": ["BUSINESS"],
-        "sku": "com.kadertower.app"
+        "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "REPLACE_WITH_TEAM_ID"
       },
       "android": {
-        "track": "internal",
-        "releaseStatus": "draft",
-        "changesNotSentForReview": false
+        "track": "internal"
       }
     }
   }
