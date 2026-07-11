@@ -23,11 +23,9 @@ import {
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import { Search, SlidersHorizontal, X, Plus, ArrowLeft } from "lucide-react-native";
-
 import * as Haptics from "expo-haptics";
-
+import { useSafeNavigation } from "@/hooks/useSafeNavigation";
 import { colors, fonts, radii, shadows, spacing } from "@/theme";
 import { StatusToggle } from "@/components/StatusToggle";
 import { TenantCard } from "@/components/TenantCard";
@@ -44,7 +42,7 @@ import type { Tenant } from "@/lib/api/types";
 
 export default function TenantsScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const navigation = useSafeNavigation();
 
   // ── State ──────────────────────────────────────────────────
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -85,12 +83,12 @@ export default function TenantsScreen() {
 
   const handleAddNew = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push("/tenant/new");
+    navigation.push("/tenant/new");
   };
 
   const handleBackToSelector = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.replace("/hub-selector");
+    navigation.replace("/hub-selector");
   };
 
   const renderItem = useCallback(
@@ -100,11 +98,11 @@ export default function TenantsScreen() {
         selected={item.id === selectedTenant?.id}
         onPress={() => {
           setSelectedId(item.id);
-          router.push(`/tenant/${item.id}`);
+          navigation.push(`/tenant/${item.id}`);
         }}
       />
     ),
-    [selectedTenant?.id],
+    [selectedTenant?.id, navigation],
   );
 
   const keyExtractor = useCallback((item: Tenant) => String(item.id), []);

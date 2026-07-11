@@ -270,7 +270,7 @@ export const CalendarPicker = forwardRef<CalendarPickerRef, CalendarPickerProps>
 // ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   overlay: {
-    ...StyleSheet.absoluteFillObject as any,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(15,23,42,0.55)",
   },
   sheet: {

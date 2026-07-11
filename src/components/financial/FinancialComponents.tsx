@@ -52,8 +52,15 @@ export function BankAccountCard({ account: acc, isSelected, onPress }: BankAccou
         <Text style={styles.cardAccountName} numberOfLines={1}>
           {acc.account_name || "Cash Account"}
         </Text>
-        <Text style={[styles.cardValue, { width: ACC_WIDTH }]}>{acc.account_no}</Text>
-        <Text style={[styles.cardBalance, { width: BALANCE_WIDTH, textAlign: "right" }]}>
+        <Text style={[
+          styles.cardValue,
+          { width: ACC_WIDTH }
+        ]}>{acc.account_no}</Text>
+        <Text style={[
+          styles.cardBalance,
+          { width: BALANCE_WIDTH, textAlign: "right" },
+          acc.current_balance < 0 && { color: colors.destructive }
+        ]}>
           {formatCurrency(acc.current_balance)}
         </Text>
       </View>
@@ -306,7 +313,7 @@ export function MovementsTable({
                     <Text style={[styles.tdText, { flex: 1.5 }]} numberOfLines={1}>{move.reference}</Text>
                     <Text style={[styles.tdText, { flex: 2 }]} numberOfLines={1}>{move.description}</Text>
                     <Text style={[styles.tdText, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }, isDebit ? { color: colors.destructive } : { color: colors.success }]}>
-                      {isDebit ? `- ${formatCurrency(Math.abs(move.amount))}` : formatCurrency(move.amount)}
+                      {formatCurrency(move.amount)}
                     </Text>
                     <View style={{ flex: 1, alignItems: "center" }}>
                       <View style={[styles.statusBadge, move.status === "posted" && { backgroundColor: "#EEF2FF" }]}>
@@ -330,7 +337,7 @@ export function MovementsTable({
                       <Text style={styles.mobileCardSub}>{move.type}</Text>
                     </View>
                     <Text style={[styles.mobileCardValue, isDebit ? { color: colors.destructive } : { color: colors.success }]}>
-                      {isDebit ? `- ${formatCurrency(Math.abs(move.amount))}` : formatCurrency(move.amount)}
+                      {formatCurrency(move.amount)}
                     </Text>
                   </View>
                   <View style={styles.mobileCardFooter}>

@@ -129,8 +129,11 @@ export interface PaginatedResponse<T> {
 
 export function formatCurrency(amount: number | null | undefined): string {
   const val = Number(amount) || 0;
-  return `$ ${val.toLocaleString("en-US", {
+  const isNegative = val < 0;
+  const absVal = Math.abs(val);
+  const formatted = absVal.toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  })}`;
+  });
+  return isNegative ? `$ (${formatted})` : `$ ${formatted}`;
 }

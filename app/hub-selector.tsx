@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
 import {
   Building,
   Landmark,
@@ -19,11 +18,12 @@ import {
 import * as Haptics from "expo-haptics";
 import { colors, fonts, radii, shadows, spacing } from "@/theme";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useSafeNavigation } from "@/hooks/useSafeNavigation";
 import { api } from "@/lib/api";
 
 export default function HubSelectorScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
+  const navigation = useSafeNavigation();
   const [loggingOut, setLoggingOut] = useState(false);
   const user = useAuthStore((s) => s.user);
 
@@ -32,14 +32,14 @@ export default function HubSelectorScreen() {
     setLoggingOut(true);
     try {
       await api.auth.logout();
-    } catch {}
+    } catch { }
     useAuthStore.getState().logout();
-    router.replace("/login");
+    navigation.replace("/login");
   };
 
   const handleNavigate = (path: any) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    router.push(path);
+    navigation.push(path);
   };
 
   return (
@@ -140,7 +140,7 @@ export default function HubSelectorScreen() {
           </Pressable>
         </View>
 
-        <Text style={styles.footer}>Powered by SiscoTech</Text>
+        <Text style={styles.footer}>Powered by SiscoTek</Text>
       </ScrollView>
     </View>
   );

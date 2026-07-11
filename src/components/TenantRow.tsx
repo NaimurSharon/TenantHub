@@ -87,7 +87,11 @@ export const TenantRow = React.memo(function TenantRow({ tenant, selected, onPre
           {tenant.companyName ?? tenant.unit}
         </Text>
         <Text style={[styles.unitValue, { width: UNIT_WIDTH }]}>{tenant.unit}</Text>
-        <Text style={[styles.balanceValue, { width: BALANCE_WIDTH, textAlign: "right" }]}>
+        <Text style={[
+          styles.balanceValue,
+          { width: BALANCE_WIDTH, textAlign: "right" },
+          tenant.balance > 0 && { color: colors.destructive },
+        ]}>
           {formatCurrency(tenant.balance)}
         </Text>
       </View>

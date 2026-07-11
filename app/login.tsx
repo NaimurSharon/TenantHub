@@ -148,7 +148,7 @@ export default function LoginScreen() {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Powered by SiscoTech</Text>
+        <Text style={styles.footer}>Powered by SiscoTek</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
