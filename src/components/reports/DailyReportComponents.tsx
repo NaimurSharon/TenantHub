@@ -136,8 +136,8 @@ export function BalancesTabContent({
                   {change === 0
                     ? "$ 0"
                     : isPositive
-                    ? `+ ${formatCurrency(change)}`
-                    : formatCurrency(change)}
+                      ? `+ ${formatCurrency(change)}`
+                      : formatCurrency(change)}
                 </Text>
               </View>
             );
@@ -209,8 +209,8 @@ export function BalancesTabContent({
                       {change === 0
                         ? "No Change"
                         : isPositive
-                        ? `+ ${formatCurrency(change)}`
-                        : formatCurrency(change)}
+                          ? `+ ${formatCurrency(change)}`
+                          : formatCurrency(change)}
                     </Text>
                   </View>
                 </View>

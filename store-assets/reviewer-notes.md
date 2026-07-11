@@ -19,48 +19,49 @@ Kader Tower is a **private, internal B2B property management application** for a
 
 ---
 
-## Feature Walkthrough for Reviewers
+## 📱 Reviewer Sandbox Mode & Walkthrough
 
-After logging in, you will see the **Hub Selector** (main landing screen):
+To ensure security and protect real tenant financial records, logging in with the reviewer credentials puts the app into a secure **client-side sandbox mode** featuring fully interactive simulated records:
 
-### 1. Tenant Hub (Tap "Tenants" card)
-- Browse the list of active tenants
-- Tap any tenant row to open the **Tenant Detail** screen
-- Explore tabs: **Invoices**, **Receipts**, **Transactions**, **Credit Memos**, **Contacts**, **Profile**
-- Use the search icon (top right) to search tenants
-- Use the toggle to switch between Active / Inactive tenants
+### 1. Tenants (Tap "Tenants" Card)
+- **Sample Tenants:**
+  - **`B.D. TRADING (F.S JOHER)`** (ID: 101) — **Outstanding Balance: `$ 17,888.82`**
+  - **`AL SHAMSI FOODS`** (ID: 102) — **Credit/Prepayment Balance: `$ (4,500.00)`** (Styled in Destructive Red and parentheses format)
+  - **`VERTEX SOFTWARE SYSTEMS`** (ID: 103) — **Balance: `$ 0.00`**
+- **Detail Screens (Select `B.D. TRADING`):**
+  - **Invoices Tab:** Displays invoice `INV-2026-001` for `$ 480,504.82`.
+  - **Receipts Tab:** Displays receipt `REC-2026-001` for `$ 462,616.00`.
+  - **Transactions Tab:** Displays both invoice debit and receipt credit lines.
+  - **Documents Tab:** Contains mock contract and trade license PDFs.
+  - **Contacts Tab:** Manage/edit simulated contacts like `John Doe`.
 
-### 2. Financial Hub (Tap "Financial Hub" card)
-- Select any bank account from the left sidebar list
-- Browse transaction movements with pagination (Previous / Next)
-- Filter by: All / Debit / Credit using the filter tabs
-- Tap the refresh icon to reload data
+### 2. Financial Hub (Tap "Financial Hub" Card)
+- **Interactive Bank Accounts:**
+  - **`Emirates NBD - Main`** — Current Balance: `$ 1,452,200.50` (Favorable green)
+  - **`ADCB - Operating`** — Current Balance: **`$ (12,500.00)`** (Unfavorable red + parentheses accounting format)
+  - **`Mashreq Cash`** — Current Balance: `$ 4,500.00`
+- **Movements Ledger:** Tap any account to view the paginated list of transactions, such as rent collections and maintenance payments.
 
-### 3. Daily Reports (Tap "Daily Reports" card)
-- View today's financial summary metrics
-- Use left/right arrows to navigate between dates
-- Tap the **calendar icon** in the date bar to select any specific date
-- Switch between tabs: **Balances**, **Collections**, **Breakdown**
-
----
-
-## App Network Dependency
-This app connects to a live API backend at `https://dev.kadertower.com`. An active internet connection is required to use all features. The reviewer test account is live on this server.
-
----
-
-## Privacy Policy
-https://dev.kadertower.com/payment-terms
+### 3. Daily Reports (Tap "Daily Reports" Card)
+- Displays cash flow summaries for the selected date.
+- **Tab Layouts:**
+  - **Balances:** Closing and opening balances for NBD, ADCB, and Mashreq.
+  - **Collections:** Subdivided collections (e.g., Residential and Commercial Rent).
+  - **Breakdown:** Aggregate head metrics (Service Charges, Utility Recoveries).
+- **Interactive Calendar:** Tap the date text or calendar icon to toggle the spring-animated calendar overlay and select any date to load reports.
 
 ---
 
-## Encryption Declaration
-This app does **not** use custom encryption beyond standard HTTPS. The `ITSAppUsesNonExemptEncryption` key is set to `false` in the app's `Info.plist`.
+## 🔒 Security & Privacy Manifests
+
+- **No Live Financial Exposure:** The sandbox mock data fully covers all app features. No live landlord or tenant banking data is transmitted or displayed.
+- **Privacy Declarations:** Built-in iOS privacy manifest files declare accessed API categories (`UserDefaults`, `FileTimestamp`, `SystemBootTime`, `DiskSpace`) in accordance with Apple's 2025/2026 guidelines.
+- **Encryption Declaration:** This app does **not** use custom encryption beyond standard HTTPS. The `ITSAppUsesNonExemptEncryption` key is set to `false` in the app's `Info.plist`.
 
 ---
 
-## Contact
+## 📞 Support & Contacts
 - **Developer Contact:** support@kadertower.com
-- **Support URL:** https://dev.kadertower.com
-- **App Category:** Business / Productivity
+- **Support / Marketing Info:** https://dev.kadertower.com
+- **Privacy Policy URL:** https://dev.kadertower.com/payment-terms
 - **Intended Audience:** Internal property management staff only
