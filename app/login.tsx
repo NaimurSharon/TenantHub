@@ -19,7 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import Toast from "react-native-toast-message";
-import { colors, fonts, radii } from "@/theme";
+import { fonts } from "@/theme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
 

@@ -7,17 +7,15 @@ import {
   useWindowDimensions,
   Pressable,
 } from "react-native";
-import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   TrendingDown,
   Receipt,
-  FileText,
   DollarSign,
   RefreshCw,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
-import { colors, fonts } from "@/theme";
+import { colors } from "@/theme";
 import { useDailyReport } from "@/hooks/queries/useFinancialQuery";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSafeNavigation } from "@/hooks/useSafeNavigation";
@@ -212,6 +210,7 @@ export default function DailyReportsScreen() {
             <CollectionsTabContent
               dailyRows={dailyRows}
               dailyTotals={dailyTotals}
+              isTablet={isTablet}
             />
           ) : (
             <BreakdownTabContent dailyTotals={dailyTotals} />

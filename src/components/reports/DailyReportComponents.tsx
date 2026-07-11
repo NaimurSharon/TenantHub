@@ -248,69 +248,155 @@ export function BalancesTabContent({
 interface CollectionsTabContentProps {
   dailyRows: any[];
   dailyTotals: any;
+  isTablet: boolean;
 }
 
 export function CollectionsTabContent({
   dailyRows,
   dailyTotals,
+  isTablet,
 }: CollectionsTabContentProps) {
-  return (
-    <View>
-      <Text style={styles.blockTitle}>Daily Collections by Category</Text>
-      <View style={styles.tableHeader}>
-        <Text style={[styles.thTxt, { flex: 1.4 }]}>Date</Text>
-        <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Rent</Text>
-        <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Svc. Charge</Text>
-        <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Elec. & Others</Text>
-        <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Parking</Text>
-        <Text style={[styles.thTxt, { flex: 1.2, textAlign: "right" }]}>Total</Text>
-      </View>
-
-      {dailyRows.length === 0 ? (
+  if (dailyRows.length === 0) {
+    return (
+      <View>
+        <Text style={styles.blockTitle}>Daily Collections by Category</Text>
         <View style={styles.emptyTable}>
           <Text style={styles.emptyTableTxt}>No entries for this date</Text>
         </View>
-      ) : (
-        dailyRows.map((row: any, idx: number) => (
-          <View key={idx} style={styles.tableRow}>
-            <Text style={[styles.tdTxt, { flex: 1.4 }]}>{row.display_date}</Text>
-            <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-              {formatCurrency(row.rent)}
-            </Text>
-            <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-              {formatCurrency(row.service_charge)}
-            </Text>
-            <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-              {formatCurrency(row.electricity_and_others)}
-            </Text>
-            <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-              {formatCurrency(row.parking)}
-            </Text>
-            <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }]}>
-              {formatCurrency(row.total_collection)}
-            </Text>
-          </View>
-        ))
-      )}
+      </View>
+    );
+  }
 
-      {dailyTotals && (
-        <View style={styles.tableTotalsRow}>
-          <Text style={[styles.totalsLabelTxt, { flex: 1.4 }]}>Total</Text>
-          <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-            {formatCurrency(dailyTotals.rent)}
-          </Text>
-          <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-            {formatCurrency(dailyTotals.service_charge)}
-          </Text>
-          <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-            {formatCurrency(dailyTotals.electricity_and_others)}
-          </Text>
-          <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-            {formatCurrency(dailyTotals.parking ?? 0)}
-          </Text>
-          <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right" }]}>
-            {formatCurrency(dailyTotals.total_collection)}
-          </Text>
+  return (
+    <View>
+      <Text style={styles.blockTitle}>Daily Collections by Category</Text>
+
+      {isTablet ? (
+        // Tablet Horizontal Table Layout
+        <View>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.thTxt, { flex: 1.4 }]}>Date</Text>
+            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Rent</Text>
+            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Svc. Charge</Text>
+            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Elec. & Others</Text>
+            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Parking</Text>
+            <Text style={[styles.thTxt, { flex: 1.2, textAlign: "right" }]}>Total</Text>
+          </View>
+
+          {dailyRows.map((row: any, idx: number) => (
+            <View key={idx} style={styles.tableRow}>
+              <Text style={[styles.tdTxt, { flex: 1.4 }]}>{row.display_date}</Text>
+              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(row.rent)}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(row.service_charge)}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(row.electricity_and_others)}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(row.parking)}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }]}>
+                {formatCurrency(row.total_collection)}
+              </Text>
+            </View>
+          ))}
+
+          {dailyTotals && (
+            <View style={styles.tableTotalsRow}>
+              <Text style={[styles.totalsLabelTxt, { flex: 1.4 }]}>Total</Text>
+              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(dailyTotals.rent)}
+              </Text>
+              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(dailyTotals.service_charge)}
+              </Text>
+              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(dailyTotals.electricity_and_others)}
+              </Text>
+              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
+                {formatCurrency(dailyTotals.parking ?? 0)}
+              </Text>
+              <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right" }]}>
+                {formatCurrency(dailyTotals.total_collection)}
+              </Text>
+            </View>
+          )}
+        </View>
+      ) : (
+        // Mobile Vertical Cards Layout
+        <View>
+          {dailyRows.map((row: any, idx: number) => (
+            <View key={idx} style={styles.mobileDataCard}>
+              <View style={[styles.mobileCardHeader, { borderBottomWidth: 1, borderBottomColor: colors.borderSoft, paddingBottom: 8, marginBottom: 8 }]}>
+                <Text style={[styles.mobileCardTitle, { color: colors.primary, fontSize: 15 }]}>
+                  {row.display_date}
+                </Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Rent:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(row.rent)}</Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Service Charge:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(row.service_charge)}</Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Electricity & Others:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(row.electricity_and_others)}</Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Parking:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(row.parking)}</Text>
+              </View>
+
+              <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.borderSoft, paddingTop: 8, marginTop: 4 }]}>
+                <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collection:</Text>
+                <Text style={[styles.mobileTotalValue, { fontFamily: fonts.bold, color: colors.primary, fontSize: 14 }]}>
+                  {formatCurrency(row.total_collection)}
+                </Text>
+              </View>
+            </View>
+          ))}
+
+          {dailyTotals && dailyRows.length > 1 && (
+            <View style={styles.mobileTotalCard}>
+              <Text style={styles.mobileTotalTitle}>Daily Scope Aggregate</Text>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Total Rent:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.rent)}</Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Total Service Charge:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.service_charge)}</Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Total Elec. & Others:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.electricity_and_others)}</Text>
+              </View>
+
+              <View style={styles.mobileTotalRow}>
+                <Text style={styles.mobileTotalLabel}>Total Parking:</Text>
+                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.parking ?? 0)}</Text>
+              </View>
+
+              <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, marginTop: 4 }]}>
+                <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collections:</Text>
+                <Text style={[styles.mobileTotalValue, { fontFamily: fonts.bold, color: colors.primary, fontSize: 15 }]}>
+                  {formatCurrency(dailyTotals.total_collection)}
+                </Text>
+              </View>
+            </View>
+          )}
         </View>
       )}
     </View>
