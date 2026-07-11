@@ -61,7 +61,11 @@
       "router": {},
       "eas": {
         "projectId": "e554432c-854f-4623-93f6-d81511d653b9"
-      }
+      },
+      "privacyPolicyUrl": "https://dev.kadertower.com/payment-terms",
+      "supportUrl": "https://dev.kadertower.com",
+      "marketingUrl": "https://dev.kadertower.com",
+      "appCategory": "Business"
     }
   }
 }

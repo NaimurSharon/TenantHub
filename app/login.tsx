@@ -12,6 +12,7 @@ import {
   Keyboard,
   Platform,
   KeyboardAvoidingView,
+  Linking,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -148,7 +149,15 @@ export default function LoginScreen() {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>Powered by SiscoTek</Text>
+        <View style={styles.footerRow}>
+          <Text style={styles.footer}>Powered by SiscoTek  ·  </Text>
+          <TouchableOpacity
+            onPress={() => Linking.openURL("https://dev.kadertower.com/payment-terms")}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.privacyLink}>Privacy Policy</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -263,11 +272,21 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     textDecorationLine: "underline",
   },
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 32,
+  },
   footer: {
     fontFamily: fonts.regular,
     fontSize: 12,
     color: "#94A3B8",
-    textAlign: "center",
-    marginTop: 32,
+  },
+  privacyLink: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: "#2563EB",
+    textDecorationLine: "underline",
   },
 });

@@ -1,0 +1,37 @@
+{
+  "name": "Kader Tower",
+  "subtitle": "Property Management System",
+  "short_description": "Manage tenants, finances, and daily reports for Kader Tower.",
+  "full_description": "Kader Tower is a professional property management platform designed for Kader Tower building operations. It provides a centralized workspace to manage tenants, track financial movements, and generate daily reports — all from a mobile device.\n\n━━━ TENANT HUB ━━━\n• View and search all active and inactive tenants\n• Access full tenant profiles including company, unit, and contact information\n• Track individual tenant balances and outstanding amounts\n• Manage and review invoices, receipts, and credit memos per tenant\n• Add, update, and remove tenant contacts\n• View full lease history and transaction records\n\n━━━ FINANCIAL HUB ━━━\n• Monitor all bank account balances in real time\n• View detailed transaction movement logs per account\n• Filter transactions by type: all, debit, or credit\n• Paginate through historical movement records\n• Negative balances displayed in standard accounting bracket notation (e.g., $ (1,250))\n\n━━━ DAILY REPORTS ━━━\n• View daily financial summaries including total receipts, payments, and outstanding amounts\n• Track opening and closing bank balances across all accounts\n• Browse collection breakdowns by category and date\n• Navigate between dates with intuitive arrow controls or a calendar picker\n\n━━━ DESIGNED FOR PROFESSIONALS ━━━\n• Clean, premium interface built for daily professional use\n• Optimized for both iPhone and iPad (split-view layout on tablet)\n• Secure authentication required for all access\n• Fast data loading with intelligent caching\n• Safe area handling for notch and Dynamic Island devices\n\nThis is a private internal application for authorized Kader Tower staff only. Login credentials are provided by your system administrator.",
+  "keywords": [
+    "property management",
+    "tenant management",
+    "real estate",
+    "financial hub",
+    "building management",
+    "rent tracking",
+    "invoice management",
+    "business",
+    "kader tower",
+    "daily reports"
+  ],
+  "support_url": "https://dev.kadertower.com",
+  "privacy_policy_url": "https://dev.kadertower.com/payment-terms",
+  "marketing_url": "https://dev.kadertower.com",
+  "categories": {
+    "ios_primary": "BUSINESS",
+    "ios_secondary": "PRODUCTIVITY",
+    "android_category": "Business"
+  },
+  "content_rating": {
+    "ios": "4+",
+    "android": "Everyone"
+  },
+  "age_rating_declaration": {
+    "violence": "NONE",
+    "gambling": "NONE",
+    "adult_content": "NONE",
+    "unrestricted_web_access": "NONE",
+    "user_generated_content": "NONE"
+  }
+}
