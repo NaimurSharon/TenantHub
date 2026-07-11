@@ -104,7 +104,7 @@ export const TenantCard = React.memo(function TenantCard({ tenant }: TenantCardP
           <Text style={[
             styles.detailValue,
             styles.balance,
-            tenant.balance > 0 && { color: colors.destructive },
+            tenant.balance < 0 && { color: colors.destructive },
           ]}>
             {formatCurrency(tenant.balance)}
           </Text>

@@ -120,7 +120,7 @@ export default function TenantHubScreen() {
                   <Text style={styles.balanceLabel}>Balance</Text>
                   <Text style={[
                     styles.balanceValue,
-                    (hubData?.header?.current_balance ?? hubData?.summary?.running_balance ?? tenant?.balance ?? 0) > 0 && { color: colors.destructive },
+                    (hubData?.header?.current_balance ?? hubData?.summary?.running_balance ?? tenant?.balance ?? 0) < 0 && { color: colors.destructive },
                   ]}>
                     {formatCurrency(hubData?.header?.current_balance ?? hubData?.summary?.running_balance ?? tenant?.balance ?? 0)}
                   </Text>
