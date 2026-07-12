@@ -13,7 +13,7 @@ Use this file to track the submission process step by step.
 - [x] iOS Privacy Manifest (`NSPrivacyAccessedAPITypes`) configured
 - [x] `NSCameraUsageDescription` and `NSPhotoLibraryUsageDescription` added
 - [x] `ITSAppUsesNonExemptEncryption: false` declared
-- [x] Privacy Policy link added to login screen (opens https://dev.kadertower.com/payment-terms)
+- [x] Privacy Policy link added to login screen (opens https://dev.kadertower.com/privacy-policy)
 - [x] `privacyPolicyUrl` added to `app.json` extra section
 - [x] `eas.json` submit configurations set up for iOS and Android
 - [x] Store listing metadata created (`store-assets/store-listing.json`)
@@ -42,7 +42,7 @@ Use this file to track the submission process step by step.
   - Category: **Business**
   - Secondary Category: **Productivity**
   - Content Rating: Complete questionnaire (expect **4+**)
-  - Privacy Policy URL: `https://dev.kadertower.com/payment-terms`
+  - Privacy Policy URL: `https://dev.kadertower.com/privacy-policy`
   - Support URL: `https://dev.kadertower.com`
 - [ ] In `eas.json`, replace:
   - `REPLACE_WITH_TEAM_ID` → Your Apple Team ID (from developer.apple.com)
@@ -63,7 +63,7 @@ Use this file to track the submission process step by step.
   - Go to: Play Console → Setup → API Access → Link to Google Cloud Project
   - Download service account JSON → save as `./service-account.json` (gitignored)
 - [ ] Fill in Store Listing from `store-assets/store-listing.json`
-- [ ] Set Privacy Policy URL: `https://dev.kadertower.com/payment-terms`
+- [ ] Set Privacy Policy URL: `https://dev.kadertower.com/privacy-policy`
 - [ ] Content Rating questionnaire (expect: **Everyone**)
 - [ ] Target Audience: Adults (18+) — internal staff only
 - [ ] Provide App Access instructions (restricted login app)

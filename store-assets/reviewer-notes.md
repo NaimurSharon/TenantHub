@@ -63,5 +63,5 @@ To ensure security and protect real tenant financial records, logging in with th
 ## 📞 Support & Contacts
 - **Developer Contact:** support@kadertower.com
 - **Support / Marketing Info:** https://dev.kadertower.com
-- **Privacy Policy URL:** https://dev.kadertower.com/payment-terms
+- **Privacy Policy URL:** https://dev.kadertower.com/privacy-policy
 - **Intended Audience:** Internal property management staff only

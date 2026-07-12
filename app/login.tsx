@@ -152,7 +152,7 @@ export default function LoginScreen() {
         <View style={styles.footerRow}>
           <Text style={styles.footer}>Powered by SiscoTek  ·  </Text>
           <TouchableOpacity
-            onPress={() => Linking.openURL("https://dev.kadertower.com/payment-terms")}
+            onPress={() => Linking.openURL("https://dev.kadertower.com/privacy-policy")}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Text style={styles.privacyLink}>Privacy Policy</Text>
