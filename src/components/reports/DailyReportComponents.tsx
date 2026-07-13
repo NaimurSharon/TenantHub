@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -256,6 +256,119 @@ export function CollectionsTabContent({
   dailyTotals,
   isTablet,
 }: CollectionsTabContentProps) {
+  // Helper to format snake_case API keys to user-friendly titles
+  const formatKeyLabel = (key: string): string => {
+    const overrides: Record<string, string> = {
+      rent: "Rent",
+      service_charge: "Service Charge",
+      electricity_and_others: "Electricity & Others",
+      rent_tax: "Rent Tax",
+      parking: "Parking",
+      parking_security_deposit: "Parking Security Deposit",
+      rent_security_deposit: "Rent Security Deposit",
+      others: "Others",
+    };
+    if (overrides[key]) return overrides[key];
+
+    return key
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  // Helper to dynamically extract categories and calculate unallocated advance collections
+  const getCategoryItems = (row: any) => {
+    const ignoredKeys = [
+      "date",
+      "display_date",
+      "cash",
+      "cheque",
+      "bank_deposit",
+      "total_collection",
+      "expense_cash",
+      "expense_cheque",
+      "expense_total",
+    ];
+
+    const items: { key: string; label: string; value: number }[] = [];
+    let categorizedSum = 0;
+
+    Object.keys(row).forEach((key) => {
+      if (!ignoredKeys.includes(key)) {
+        const val = Number(row[key] ?? 0);
+        if (val > 0) {
+          items.push({
+            key,
+            label: formatKeyLabel(key),
+            value: val,
+          });
+          categorizedSum += val;
+        }
+      }
+    });
+
+    const total = Number(row.total_collection ?? 0);
+    // Unallocated represents payment amount not distributed to specific category bills
+    const unallocated = total - categorizedSum;
+    // if (unallocated > 0.01) {
+    //   items.push({
+    //     key: "unallocated",
+    //     label: "Advance & Unallocated",
+    //     value: unallocated,
+    //   });
+    // }
+
+    return items;
+  };
+
+  // Compute dynamic column definitions for tablet layout
+  const tableColumns = useMemo(() => {
+    const ignoredKeys = [
+      "date",
+      "display_date",
+      "cash",
+      "cheque",
+      "bank_deposit",
+      "total_collection",
+      "expense_cash",
+      "expense_cheque",
+      "expense_total",
+    ];
+    const keysSet = new Set<string>();
+    let showUnallocated = false;
+
+    dailyRows.forEach((row) => {
+      let categorizedSum = 0;
+      Object.keys(row).forEach((key) => {
+        if (!ignoredKeys.includes(key)) {
+          const val = Number(row[key] ?? 0);
+          if (val > 0) {
+            keysSet.add(key);
+            categorizedSum += val;
+          }
+        }
+      });
+      const total = Number(row.total_collection ?? 0);
+      if (total - categorizedSum > 0.01) {
+        showUnallocated = true;
+      }
+    });
+
+    const cols = Array.from(keysSet).map((key) => ({
+      key,
+      label: formatKeyLabel(key),
+    }));
+
+    if (showUnallocated) {
+      cols.push({
+        key: "unallocated",
+        label: "Advance & Unallocated",
+      });
+    }
+
+    return cols;
+  }, [dailyRows]);
+
   if (dailyRows.length === 0) {
     return (
       <View>
@@ -272,53 +385,50 @@ export function CollectionsTabContent({
       <Text style={styles.blockTitle}>Daily Collections by Category</Text>
 
       {isTablet ? (
-        // Tablet Horizontal Table Layout
+        // Tablet Horizontal Table Layout (Dynamic Columns)
         <View>
           <View style={styles.tableHeader}>
-            <Text style={[styles.thTxt, { flex: 1.4 }]}>Date</Text>
-            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Rent</Text>
-            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Svc. Charge</Text>
-            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Elec. & Others</Text>
-            <Text style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>Parking</Text>
+            <Text style={[styles.thTxt, { flex: 1.2 }]}>Date</Text>
+            {tableColumns.map((col: any) => (
+              <Text key={col.key} style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>
+                {col.label}
+              </Text>
+            ))}
             <Text style={[styles.thTxt, { flex: 1.2, textAlign: "right" }]}>Total</Text>
           </View>
 
-          {dailyRows.map((row: any, idx: number) => (
-            <View key={idx} style={styles.tableRow}>
-              <Text style={[styles.tdTxt, { flex: 1.4 }]}>{row.display_date}</Text>
-              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(row.rent)}
-              </Text>
-              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(row.service_charge)}
-              </Text>
-              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(row.electricity_and_others)}
-              </Text>
-              <Text style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(row.parking)}
-              </Text>
-              <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }]}>
-                {formatCurrency(row.total_collection)}
-              </Text>
-            </View>
-          ))}
+          {dailyRows.map((row: any, idx: number) => {
+            const items = getCategoryItems(row);
+            return (
+              <View key={idx} style={styles.tableRow}>
+                <Text style={[styles.tdTxt, { flex: 1.2 }]}>{row.display_date}</Text>
+                {tableColumns.map((col: any) => {
+                  const match = items.find((item) => item.key === col.key);
+                  return (
+                    <Text key={col.key} style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
+                      {formatCurrency(match ? match.value : 0)}
+                    </Text>
+                  );
+                })}
+                <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }]}>
+                  {formatCurrency(row.total_collection)}
+                </Text>
+              </View>
+            );
+          })}
 
           {dailyTotals && (
             <View style={styles.tableTotalsRow}>
-              <Text style={[styles.totalsLabelTxt, { flex: 1.4 }]}>Total</Text>
-              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(dailyTotals.rent)}
-              </Text>
-              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(dailyTotals.service_charge)}
-              </Text>
-              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(dailyTotals.electricity_and_others)}
-              </Text>
-              <Text style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-                {formatCurrency(dailyTotals.parking ?? 0)}
-              </Text>
+              <Text style={[styles.totalsLabelTxt, { flex: 1.2 }]}>Total</Text>
+              {tableColumns.map((col: any) => {
+                const totalItems = getCategoryItems(dailyTotals);
+                const match = totalItems.find((item) => item.key === col.key);
+                return (
+                  <Text key={col.key} style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
+                    {formatCurrency(match ? match.value : 0)}
+                  </Text>
+                );
+              })}
               <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right" }]}>
                 {formatCurrency(dailyTotals.total_collection)}
               </Text>
@@ -326,68 +436,45 @@ export function CollectionsTabContent({
           )}
         </View>
       ) : (
-        // Mobile Vertical Cards Layout
+        // Mobile Vertical Cards Layout (Dynamic List Items)
         <View>
-          {dailyRows.map((row: any, idx: number) => (
-            <View key={idx} style={styles.mobileDataCard}>
-              <View style={[styles.mobileCardHeader, { borderBottomWidth: 1, borderBottomColor: colors.borderSoft, paddingBottom: 8, marginBottom: 8 }]}>
-                <Text style={[styles.mobileCardTitle, { color: colors.primary, fontSize: 15 }]}>
-                  {row.display_date}
-                </Text>
-              </View>
+          {dailyRows.map((row: any, idx: number) => {
+            const items = getCategoryItems(row);
+            return (
+              <View key={idx} style={styles.mobileDataCard}>
+                <View style={[styles.mobileCardHeader, { borderBottomWidth: 1, borderBottomColor: colors.borderSoft, paddingBottom: 8, marginBottom: 8 }]}>
+                  <Text style={[styles.mobileCardTitle, { color: colors.primary, fontSize: 15 }]}>
+                    {row.display_date}
+                  </Text>
+                </View>
 
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Rent:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(row.rent)}</Text>
-              </View>
+                {items.map((item) => (
+                  <View key={item.key} style={styles.mobileTotalRow}>
+                    <Text style={styles.mobileTotalLabel}>{item.label}:</Text>
+                    <Text style={styles.mobileTotalValue}>{formatCurrency(item.value)}</Text>
+                  </View>
+                ))}
 
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Service Charge:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(row.service_charge)}</Text>
+                <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.borderSoft, paddingTop: 8, marginTop: 4 }]}>
+                  <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collection:</Text>
+                  <Text style={[styles.mobileTotalValue, { fontFamily: fonts.bold, color: colors.primary, fontSize: 14 }]}>
+                    {formatCurrency(row.total_collection)}
+                  </Text>
+                </View>
               </View>
-
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Electricity & Others:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(row.electricity_and_others)}</Text>
-              </View>
-
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Parking:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(row.parking)}</Text>
-              </View>
-
-              <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.borderSoft, paddingTop: 8, marginTop: 4 }]}>
-                <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collection:</Text>
-                <Text style={[styles.mobileTotalValue, { fontFamily: fonts.bold, color: colors.primary, fontSize: 14 }]}>
-                  {formatCurrency(row.total_collection)}
-                </Text>
-              </View>
-            </View>
-          ))}
+            );
+          })}
 
           {dailyTotals && dailyRows.length > 1 && (
             <View style={styles.mobileTotalCard}>
               <Text style={styles.mobileTotalTitle}>Daily Scope Aggregate</Text>
 
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Total Rent:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.rent)}</Text>
-              </View>
-
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Total Service Charge:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.service_charge)}</Text>
-              </View>
-
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Total Elec. & Others:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.electricity_and_others)}</Text>
-              </View>
-
-              <View style={styles.mobileTotalRow}>
-                <Text style={styles.mobileTotalLabel}>Total Parking:</Text>
-                <Text style={styles.mobileTotalValue}>{formatCurrency(dailyTotals.parking ?? 0)}</Text>
-              </View>
+              {getCategoryItems(dailyTotals).map((item) => (
+                <View key={item.key} style={styles.mobileTotalRow}>
+                  <Text style={styles.mobileTotalLabel}>Total {item.label}:</Text>
+                  <Text style={styles.mobileTotalValue}>{formatCurrency(item.value)}</Text>
+                </View>
+              ))}
 
               <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, marginTop: 4 }]}>
                 <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collections:</Text>

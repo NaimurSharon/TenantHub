@@ -7,7 +7,7 @@
 import { create } from "zustand";
 import type { TenantStatus } from "@/lib/api/types";
 
-export type SortField = "name" | "balance" | "unit" | "createdAt";
+export type SortField = "name" | "balance" | "unit" | "createdAt" | "longestOverdue";
 export type SortOrder = "asc" | "desc";
 
 interface FilterState {

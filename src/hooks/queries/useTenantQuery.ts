@@ -67,6 +67,27 @@ export function useTenants() {
       else if (sortBy === "balance") cmp = a.balance - b.balance;
       else if (sortBy === "unit") cmp = a.unit.localeCompare(b.unit);
       else if (sortBy === "createdAt") cmp = a.createdAt.localeCompare(b.createdAt);
+      else if (sortBy === "longestOverdue") {
+        const aHasBalance = a.balance > 0;
+        const bHasBalance = b.balance > 0;
+
+        if (aHasBalance && !bHasBalance) {
+          return -1; // Keep a first (has balance, b doesn't)
+        }
+        if (!aHasBalance && bHasBalance) {
+          return 1; // Keep b first (has balance, a doesn't)
+        }
+
+        if (aHasBalance && bHasBalance) {
+          // Both have unpaid balances; sort by oldest date (longest overdue)
+          const dateA = a.leaseStart || a.createdAt || "";
+          const dateB = b.leaseStart || b.createdAt || "";
+          cmp = dateA.localeCompare(dateB);
+        } else {
+          // Neither has a balance; sort alphabetically
+          cmp = a.name.localeCompare(b.name);
+        }
+      }
       return sortOrder === "asc" ? cmp : -cmp;
     });
 

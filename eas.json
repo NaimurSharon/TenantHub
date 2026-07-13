@@ -35,7 +35,10 @@
       "ios": {
         "appleId": "REPLACE_WITH_APPLE_ID_EMAIL",
         "ascAppId": "REPLACE_WITH_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "REPLACE_WITH_TEAM_ID"
+        "appleTeamId": "REPLACE_WITH_TEAM_ID",
+        "ascApiKeyPath": "./AuthKey_C66592TZ2J.p8",
+        "ascApiKeyIssuerId": "8bd21bbe-62ea-4d17-9769-5c9b92883236",
+        "ascApiKeyId": "C66592TZ2J"
       },
       "android": {
         "track": "internal"

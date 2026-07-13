@@ -239,6 +239,25 @@ export async function mockListTenants(
     else if (sortBy === "createdAt")
       cmp =
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    else if (sortBy === "longestOverdue") {
+      const aHasBalance = a.balance > 0;
+      const bHasBalance = b.balance > 0;
+
+      if (aHasBalance && !bHasBalance) {
+        return -1;
+      }
+      if (!aHasBalance && bHasBalance) {
+        return 1;
+      }
+
+      if (aHasBalance && bHasBalance) {
+        const dateA = a.leaseStart || a.createdAt || "";
+        const dateB = b.leaseStart || b.createdAt || "";
+        cmp = dateA.localeCompare(dateB);
+      } else {
+        cmp = a.name.localeCompare(b.name);
+      }
+    }
     return order === "asc" ? cmp : -cmp;
   });
 

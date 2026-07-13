@@ -98,7 +98,7 @@ export interface TenantFilters {
   unit?: string;
   balanceMin?: number;
   balanceMax?: number;
-  sortBy?: "name" | "balance" | "unit" | "createdAt";
+  sortBy?: "name" | "balance" | "unit" | "createdAt" | "longestOverdue";
   sortOrder?: "asc" | "desc";
   page?: number;
   perPage?: number;

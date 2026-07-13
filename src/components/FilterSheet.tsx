@@ -37,6 +37,7 @@ const SORT_OPTIONS: { key: SortField; label: string }[] = [
   { key: "balance", label: "Balance" },
   { key: "unit", label: "Unit" },
   { key: "createdAt", label: "Date Added" },
+  { key: "longestOverdue", label: "Longest Overdue" },
 ];
 
 const ORDER_OPTIONS: { key: SortOrder; label: string }[] = [
