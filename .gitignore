@@ -15,4 +15,5 @@ web-build/
 # Store submission secrets
 service-account.json
 google-services.json
-GoogleService-Info.plist
+GoogleService-Info.plist
+credentials.json

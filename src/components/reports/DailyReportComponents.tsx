@@ -309,7 +309,7 @@ export function CollectionsTabContent({
 
     const total = Number(row.total_collection ?? 0);
     // Unallocated represents payment amount not distributed to specific category bills
-    const unallocated = total - categorizedSum;
+    // const unallocated = total - categorizedSum;
     // if (unallocated > 0.01) {
     //   items.push({
     //     key: "unallocated",
@@ -504,46 +504,69 @@ export function BreakdownTabContent({ dailyTotals }: BreakdownTabContentProps) {
     );
   }
 
+  // Get dynamic category items from the dailyTotals row
+  const ignoredKeys = [
+    "date",
+    "display_date",
+    "cash",
+    "cheque",
+    "bank_deposit",
+    "total_collection",
+    "expense_cash",
+    "expense_cheque",
+    "expense_total",
+  ];
+
+  const formatKeyLabel = (key: string) => {
+    return key
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const getCategoryItems = (row: any) => {
+    const items: { key: string; label: string; value: number }[] = [];
+    let categorizedSum = 0;
+
+    Object.keys(row).forEach((key) => {
+      if (!ignoredKeys.includes(key)) {
+        const val = Number(row[key] ?? 0);
+        if (val > 0) {
+          items.push({
+            key,
+            label: formatKeyLabel(key),
+            value: val,
+          });
+          categorizedSum += val;
+        }
+      }
+    });
+
+    const total = Number(row.total_collection ?? 0);
+    // const unallocated = total - categorizedSum;
+    // if (unallocated > 0.01) {
+    //   items.push({
+    //     key: "unallocated",
+    //     label: "Advance & Unallocated",
+    //     value: unallocated,
+    //   });
+    // }
+
+    return items;
+  };
+
+  const items = getCategoryItems(dailyTotals);
+
   return (
     <View>
       <Text style={styles.blockTitle}>Revenue Stream Breakdown</Text>
       <View style={styles.breakdownGrid}>
-        <View style={styles.breakdownRow}>
-          <Text style={styles.breakdownLabel}>Rent</Text>
-          <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.rent ?? 0)}</Text>
-        </View>
-        <View style={styles.breakdownRow}>
-          <Text style={styles.breakdownLabel}>Service Charge</Text>
-          <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.service_charge ?? 0)}</Text>
-        </View>
-        <View style={styles.breakdownRow}>
-          <Text style={styles.breakdownLabel}>Electricity & Others</Text>
-          <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.electricity_and_others ?? 0)}</Text>
-        </View>
-        {(dailyTotals.parking ?? 0) > 0 && (
-          <View style={styles.breakdownRow}>
-            <Text style={styles.breakdownLabel}>Parking</Text>
-            <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.parking)}</Text>
+        {items.map((item) => (
+          <View key={item.key} style={styles.breakdownRow}>
+            <Text style={styles.breakdownLabel}>{item.label}</Text>
+            <Text style={styles.breakdownValue}>{formatCurrency(item.value)}</Text>
           </View>
-        )}
-        {(dailyTotals.parking_security_deposit ?? 0) > 0 && (
-          <View style={styles.breakdownRow}>
-            <Text style={styles.breakdownLabel}>Parking Security Deposit</Text>
-            <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.parking_security_deposit)}</Text>
-          </View>
-        )}
-        {(dailyTotals.rent_security_deposit ?? 0) > 0 && (
-          <View style={styles.breakdownRow}>
-            <Text style={styles.breakdownLabel}>Rent Security Deposit</Text>
-            <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.rent_security_deposit)}</Text>
-          </View>
-        )}
-        {(dailyTotals.others ?? 0) > 0 && (
-          <View style={styles.breakdownRow}>
-            <Text style={styles.breakdownLabel}>Others</Text>
-            <Text style={styles.breakdownValue}>{formatCurrency(dailyTotals.others)}</Text>
-          </View>
-        )}
+        ))}
         <View style={[styles.breakdownRow, styles.breakdownTotal]}>
           <Text style={styles.breakdownLabelTotal}>Total Collection</Text>
           <Text style={styles.breakdownValueTotal}>

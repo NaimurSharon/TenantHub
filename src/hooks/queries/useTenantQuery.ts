@@ -6,6 +6,7 @@ import { useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { api } from "@/lib/api";
 import { useFilterStore } from "@/store/useFilterStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import type { TenantFilters, Tenant } from "@/lib/api/types";
 
 const PAGE_SIZE = 20;
@@ -31,12 +32,19 @@ export function useTenants() {
     }))
   );
 
-  const queryFilters = { status, search: search || undefined };
+  const queryFilters = { status, search: search || undefined, sortBy, sortOrder };
 
   const query = useInfiniteQuery({
     queryKey: tenantKeys.list(queryFilters),
     queryFn: ({ pageParam = 1 }) =>
-      api.tenants.list({ status, search: search || undefined, perPage: PAGE_SIZE, page: pageParam }),
+      api.tenants.list({
+        status,
+        search: search || undefined,
+        sortBy,
+        sortOrder,
+        perPage: PAGE_SIZE,
+        page: pageParam,
+      }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.page + 1 : undefined),
     staleTime: 2 * 60_000,
@@ -60,36 +68,42 @@ export function useTenants() {
     if (balanceMin != null) items = items.filter((t) => t.balance >= balanceMin);
     if (balanceMax != null) items = items.filter((t) => t.balance <= balanceMax);
 
-    // Client-side: sort
-    items.sort((a, b) => {
-      let cmp = 0;
-      if (sortBy === "name") cmp = a.name.localeCompare(b.name);
-      else if (sortBy === "balance") cmp = a.balance - b.balance;
-      else if (sortBy === "unit") cmp = a.unit.localeCompare(b.unit);
-      else if (sortBy === "createdAt") cmp = a.createdAt.localeCompare(b.createdAt);
-      else if (sortBy === "longestOverdue") {
-        const aHasBalance = a.balance > 0;
-        const bHasBalance = b.balance > 0;
+    // Client-side: sort (only run client-side if in mock/reviewer mode or for unsupported backend fields like 'createdAt')
+    const user = useAuthStore.getState().user;
+    const isReviewer = user?.email?.toLowerCase().trim() === "reviewer@kadertower.com";
+    const shouldSortClientSide = isReviewer || sortBy === "createdAt";
 
-        if (aHasBalance && !bHasBalance) {
-          return -1; // Keep a first (has balance, b doesn't)
-        }
-        if (!aHasBalance && bHasBalance) {
-          return 1; // Keep b first (has balance, a doesn't)
-        }
+    if (shouldSortClientSide) {
+      items.sort((a, b) => {
+        let cmp = 0;
+        if (sortBy === "name") cmp = a.name.localeCompare(b.name);
+        else if (sortBy === "balance") cmp = a.balance - b.balance;
+        else if (sortBy === "unit") cmp = a.unit.localeCompare(b.unit);
+        else if (sortBy === "createdAt") cmp = a.createdAt.localeCompare(b.createdAt);
+        else if (sortBy === "longestOverdue") {
+          const aHasBalance = a.balance > 0;
+          const bHasBalance = b.balance > 0;
 
-        if (aHasBalance && bHasBalance) {
-          // Both have unpaid balances; sort by oldest date (longest overdue)
-          const dateA = a.leaseStart || a.createdAt || "";
-          const dateB = b.leaseStart || b.createdAt || "";
-          cmp = dateA.localeCompare(dateB);
-        } else {
-          // Neither has a balance; sort alphabetically
-          cmp = a.name.localeCompare(b.name);
+          if (aHasBalance && !bHasBalance) {
+            return -1; // Keep a first (has balance, b doesn't)
+          }
+          if (!aHasBalance && bHasBalance) {
+            return 1; // Keep b first (has balance, a doesn't)
+          }
+
+          if (aHasBalance && bHasBalance) {
+            // Both have unpaid balances; sort by oldest date (longest overdue)
+            const dateA = a.leaseStart || a.createdAt || "";
+            const dateB = b.leaseStart || b.createdAt || "";
+            cmp = dateA.localeCompare(dateB);
+          } else {
+            // Neither has a balance; sort alphabetically
+            cmp = a.name.localeCompare(b.name);
+          }
         }
-      }
-      return sortOrder === "asc" ? cmp : -cmp;
-    });
+        return sortOrder === "asc" ? cmp : -cmp;
+      });
+    }
 
     return items;
   }, [query.data, unit, balanceMin, balanceMax, sortBy, sortOrder]);

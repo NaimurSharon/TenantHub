@@ -172,27 +172,40 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
           </View>
 
           {/* Sort Order */}
-          <Text style={styles.sectionLabel}>Order</Text>
+          <Text
+            style={[
+              styles.sectionLabel,
+              sortBy === "longestOverdue" && { opacity: 0.5 },
+            ]}
+          >
+            Order
+          </Text>
           <View style={styles.chipRow}>
-            {ORDER_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.key}
-                onPress={() => setSortOrder(opt.key)}
-                style={[
-                  styles.chip,
-                  sortOrder === opt.key && styles.chipActive,
-                ]}
-              >
-                <Text
+            {ORDER_OPTIONS.map((opt) => {
+              const isOptionActive = sortOrder === opt.key && sortBy !== "longestOverdue";
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  disabled={sortBy === "longestOverdue"}
+                  onPress={() => setSortOrder(opt.key)}
                   style={[
-                    styles.chipText,
-                    sortOrder === opt.key && styles.chipTextActive,
+                    styles.chip,
+                    isOptionActive && styles.chipActive,
+                    sortBy === "longestOverdue" && styles.chipDisabled,
                   ]}
                 >
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={[
+                      styles.chipText,
+                      isOptionActive && styles.chipTextActive,
+                      sortBy === "longestOverdue" && styles.chipTextDisabled,
+                    ]}
+                  >
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </ScrollView>
 
@@ -293,6 +306,14 @@ const styles = StyleSheet.create({
   chipTextActive: {
     color: colors.primary,
     fontFamily: fonts.semiBold,
+  },
+  chipDisabled: {
+    backgroundColor: colors.secondary,
+    borderColor: colors.border,
+    opacity: 0.4,
+  },
+  chipTextDisabled: {
+    color: colors.mutedForeground,
   },
   actions: {
     flexDirection: "row",

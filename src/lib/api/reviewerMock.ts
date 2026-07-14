@@ -147,28 +147,37 @@ export function getMockAccountDetail(id: number) {
 
 // Mock Daily Report Data
 export function getMockDailyReport(date: string) {
+  const now = date || new Date().toISOString().split("T")[0];
   return {
     summary: {
       invoice_amount: 154200.00,
       invoice_count: 5,
       receipt_amount: 112500.00,
-      receipt_count: 8,
-      payment_amount: 45000.00,
-      payment_count: 3,
+      receipt_count: 3,
+      expense_amount: 45000.00,
+      expense_count: 2,
+      net_collection: 67500.00,
       outstanding_amount: 41700.00
     },
-    balances: [
-      { sl: 1, type: "Emirates NBD - Main", opening: 1352200.50, closing: 1452200.50 },
-      { sl: 2, type: "ADCB - Operating", opening: 0, closing: -12500.00 },
-      { sl: 3, type: "Mashreq Cash", opening: 4500.00, closing: 4500.00 }
+    cash_bank_balances: {
+      rows: [
+        { sl: 1, type: "Emirates NBD - Main", opening: 1352200.50, closing: 1452200.50 },
+        { sl: 2, type: "ADCB - Operating", opening: 0, closing: -12500.00 },
+        { sl: 3, type: "Mashreq Cash", opening: 4500.00, closing: 4500.00 }
+      ],
+      totals: {
+        opening: 1356700.50,
+        closing: 1444200.50
+      }
+    },
+    receipt_rows: [
+      { id: 201, unit_name: "GF-03", date: now, number: "REC-9921", party: "B.D. TRADING", customer: "B.D. TRADING", lease: "KT-L1", report_type: "Rent", method: "Cash", description: "Rent collection", amount: 85000.00, status: "posted" },
+      { id: 202, unit_name: "GF-04", date: now, number: "REC-9922", party: "AL SHAMSI FOODS", customer: "AL SHAMSI FOODS", lease: "KT-L2", report_type: "Service Charge", method: "Cheque", description: "Service charge collection", amount: 25000.00, status: "posted" },
+      { id: 203, unit_name: "5TH-12", date: now, number: "REC-9923", party: "VERTEX SOFTWARE", customer: "VERTEX SOFTWARE", lease: "KT-L3", report_type: "Others", method: "Bank Transfer", description: "Other fee collection", amount: 7500.00, status: "posted" }
     ],
-    collections: [
-      { sl: 1, category: "Residential Rent", invoices: 3, collections: 85000.00 },
-      { sl: 2, category: "Commercial Rent", invoices: 2, collections: 27500.00 }
-    ],
-    breakdown: [
-      { sl: 1, head: "Service Charges", current: 8500.00, aggregate: 92000.00 },
-      { sl: 2, head: "Utility Recoveries", current: 3500.00, aggregate: 41000.00 }
+    expense_rows: [
+      { id: 301, date: now, number: "EXP-9921", party: "Maintenance Vendor", description: "AC Maintenance", amount: 40000.00, status: "posted" },
+      { id: 302, date: now, number: "EXP-9922", party: "Office Supplies Depot", description: "Stationery", amount: 5000.00, status: "posted" }
     ]
   };
 }

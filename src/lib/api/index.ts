@@ -99,16 +99,35 @@ export const api = {
         };
       }
 
+      const queryParams: any = {
+        per_page: filters.perPage ?? 20,
+        page: filters.page ?? 1,
+        is_active: filters.status === "active" ? 1 : 0,
+        ...(filters.search ? { q: filters.search } : {}),
+      };
+
+      if (filters.sortBy) {
+        if (filters.sortBy === "longestOverdue") {
+          queryParams.source = "oldest_unpaid";
+        } else {
+          const sortByMap: Record<string, string> = {
+            name: "display_name",
+            balance: "current_balance",
+            unit: "unit_name",
+          };
+          const mapped = sortByMap[filters.sortBy];
+          if (mapped) {
+            queryParams.sortBy = mapped;
+            queryParams.order = filters.sortOrder ?? "asc";
+          }
+        }
+      }
+
       const res = await apiRequest<{
         data: Customer[];
         meta?: { total?: number; current_page?: number; per_page?: number; last_page?: number };
       }>("/customers", {
-        query: {
-          per_page: filters.perPage ?? 20,
-          page: filters.page ?? 1,
-          is_active: filters.status === "active" ? 1 : 0,
-          ...(filters.search ? { q: filters.search } : {}),
-        },
+        query: queryParams,
       });
       const tenants = (res.data ?? []).map(customerToTenant);
       const meta = res.meta ?? {};
