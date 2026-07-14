@@ -246,135 +246,24 @@ export function BalancesTabContent({
 
 // ── 4. CollectionsTabContent ──────────────────────────────────────────────────
 interface CollectionsTabContentProps {
-  dailyRows: any[];
-  dailyTotals: any;
+  receiptRows: any[];
   isTablet: boolean;
 }
 
 export function CollectionsTabContent({
-  dailyRows,
-  dailyTotals,
+  receiptRows,
   isTablet,
 }: CollectionsTabContentProps) {
-  // Helper to format snake_case API keys to user-friendly titles
-  const formatKeyLabel = (key: string): string => {
-    const overrides: Record<string, string> = {
-      rent: "Rent",
-      service_charge: "Service Charge",
-      electricity_and_others: "Electricity & Others",
-      rent_tax: "Rent Tax",
-      parking: "Parking",
-      parking_security_deposit: "Parking Security Deposit",
-      rent_security_deposit: "Rent Security Deposit",
-      others: "Others",
-    };
-    if (overrides[key]) return overrides[key];
+  const totalCollections = useMemo(() => {
+    return receiptRows.reduce((sum, r) => sum + Number(r.amount ?? 0), 0);
+  }, [receiptRows]);
 
-    return key
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
-  // Helper to dynamically extract categories and calculate unallocated advance collections
-  const getCategoryItems = (row: any) => {
-    const ignoredKeys = [
-      "date",
-      "display_date",
-      "cash",
-      "cheque",
-      "bank_deposit",
-      "total_collection",
-      "expense_cash",
-      "expense_cheque",
-      "expense_total",
-    ];
-
-    const items: { key: string; label: string; value: number }[] = [];
-    let categorizedSum = 0;
-
-    Object.keys(row).forEach((key) => {
-      if (!ignoredKeys.includes(key)) {
-        const val = Number(row[key] ?? 0);
-        if (val > 0) {
-          items.push({
-            key,
-            label: formatKeyLabel(key),
-            value: val,
-          });
-          categorizedSum += val;
-        }
-      }
-    });
-
-    const total = Number(row.total_collection ?? 0);
-    // Unallocated represents payment amount not distributed to specific category bills
-    // const unallocated = total - categorizedSum;
-    // if (unallocated > 0.01) {
-    //   items.push({
-    //     key: "unallocated",
-    //     label: "Advance & Unallocated",
-    //     value: unallocated,
-    //   });
-    // }
-
-    return items;
-  };
-
-  // Compute dynamic column definitions for tablet layout
-  const tableColumns = useMemo(() => {
-    const ignoredKeys = [
-      "date",
-      "display_date",
-      "cash",
-      "cheque",
-      "bank_deposit",
-      "total_collection",
-      "expense_cash",
-      "expense_cheque",
-      "expense_total",
-    ];
-    const keysSet = new Set<string>();
-    let showUnallocated = false;
-
-    dailyRows.forEach((row) => {
-      let categorizedSum = 0;
-      Object.keys(row).forEach((key) => {
-        if (!ignoredKeys.includes(key)) {
-          const val = Number(row[key] ?? 0);
-          if (val > 0) {
-            keysSet.add(key);
-            categorizedSum += val;
-          }
-        }
-      });
-      const total = Number(row.total_collection ?? 0);
-      if (total - categorizedSum > 0.01) {
-        showUnallocated = true;
-      }
-    });
-
-    const cols = Array.from(keysSet).map((key) => ({
-      key,
-      label: formatKeyLabel(key),
-    }));
-
-    if (showUnallocated) {
-      cols.push({
-        key: "unallocated",
-        label: "Advance & Unallocated",
-      });
-    }
-
-    return cols;
-  }, [dailyRows]);
-
-  if (dailyRows.length === 0) {
+  if (receiptRows.length === 0) {
     return (
       <View>
-        <Text style={styles.blockTitle}>Daily Collections by Category</Text>
+        <Text style={styles.blockTitle}>Daily Collections</Text>
         <View style={styles.emptyTable}>
-          <Text style={styles.emptyTableTxt}>No entries for this date</Text>
+          <Text style={styles.emptyTableTxt}>No collections for this date</Text>
         </View>
       </View>
     );
@@ -382,198 +271,168 @@ export function CollectionsTabContent({
 
   return (
     <View>
-      <Text style={styles.blockTitle}>Daily Collections by Category</Text>
+      <Text style={styles.blockTitle}>Daily Collections</Text>
 
       {isTablet ? (
-        // Tablet Horizontal Table Layout (Dynamic Columns)
+        // Tablet horizontal table layout
         <View>
           <View style={styles.tableHeader}>
-            <Text style={[styles.thTxt, { flex: 1.2 }]}>Date</Text>
-            {tableColumns.map((col: any) => (
-              <Text key={col.key} style={[styles.thTxt, { flex: 1, textAlign: "right" }]}>
-                {col.label}
-              </Text>
-            ))}
-            <Text style={[styles.thTxt, { flex: 1.2, textAlign: "right" }]}>Total</Text>
+            <Text style={[styles.thTxt, { flex: 1.2 }]}>Receipt No</Text>
+            <Text style={[styles.thTxt, { flex: 2.5 }]}>Tenant / Unit</Text>
+            <Text style={[styles.thTxt, { flex: 1.2 }]}>Method</Text>
+            <Text style={[styles.thTxt, { flex: 1.2, textAlign: "right" }]}>Amount</Text>
           </View>
 
-          {dailyRows.map((row: any, idx: number) => {
-            const items = getCategoryItems(row);
-            return (
-              <View key={idx} style={styles.tableRow}>
-                <Text style={[styles.tdTxt, { flex: 1.2 }]}>{row.display_date}</Text>
-                {tableColumns.map((col: any) => {
-                  const match = items.find((item) => item.key === col.key);
-                  return (
-                    <Text key={col.key} style={[styles.tdTxt, { flex: 1, textAlign: "right" }]}>
-                      {formatCurrency(match ? match.value : 0)}
-                    </Text>
-                  );
-                })}
-                <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }]}>
-                  {formatCurrency(row.total_collection)}
-                </Text>
-              </View>
-            );
-          })}
-
-          {dailyTotals && (
-            <View style={styles.tableTotalsRow}>
-              <Text style={[styles.totalsLabelTxt, { flex: 1.2 }]}>Total</Text>
-              {tableColumns.map((col: any) => {
-                const totalItems = getCategoryItems(dailyTotals);
-                const match = totalItems.find((item) => item.key === col.key);
-                return (
-                  <Text key={col.key} style={[styles.totalsValTxt, { flex: 1, textAlign: "right" }]}>
-                    {formatCurrency(match ? match.value : 0)}
-                  </Text>
-                );
-              })}
-              <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right" }]}>
-                {formatCurrency(dailyTotals.total_collection)}
+          {receiptRows.map((row: any, idx: number) => (
+            <View key={idx} style={styles.tableRow}>
+              <Text style={[styles.tdTxt, { flex: 1.2 }]}>{row.number || row.id}</Text>
+              <Text style={[styles.tdTxt, { flex: 2.5 }]}>
+                {row.customer || row.party}{row.unit_name ? ` (Unit: ${row.unit_name})` : ""}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1.2 }]}>
+                {row.method || "Cash"}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", color: "#10B981" }]}>
+                {formatCurrency(row.amount)}
               </Text>
             </View>
-          )}
+          ))}
+
+          <View style={styles.tableTotalsRow}>
+            <Text style={[styles.totalsLabelTxt, { flex: 4.9 }]}>Total Collections</Text>
+            <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right", color: "#10B981" }]}>
+              {formatCurrency(totalCollections)}
+            </Text>
+          </View>
         </View>
       ) : (
-        // Mobile Vertical Cards Layout (Dynamic List Items)
+        // Mobile vertical list layout (matching breakdown/expenses styling)
         <View>
-          {dailyRows.map((row: any, idx: number) => {
-            const items = getCategoryItems(row);
-            return (
-              <View key={idx} style={styles.mobileDataCard}>
-                <View style={[styles.mobileCardHeader, { borderBottomWidth: 1, borderBottomColor: colors.borderSoft, paddingBottom: 8, marginBottom: 8 }]}>
-                  <Text style={[styles.mobileCardTitle, { color: colors.primary, fontSize: 15 }]}>
-                    {row.display_date}
+          <View style={styles.breakdownGrid}>
+            {receiptRows.map((row: any, idx: number) => (
+              <View key={idx} style={styles.breakdownRow}>
+                <View style={{ flex: 1, marginRight: 16 }}>
+                  <Text style={styles.breakdownLabel} numberOfLines={2}>
+                    {row.customer || row.party || "Tenant"}
+                  </Text>
+                  <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.mutedForeground, marginTop: 2 }}>
+                    Unit: {row.unit_name || "N/A"} • Category: {row.report_type || "Others"}
+                  </Text>
+                  <Text style={{ fontFamily: fonts.regular, fontSize: 10, color: colors.mutedForeground, marginTop: 2 }}>
+                    Receipt: {row.number || row.id} ({row.method || "Cash"})
                   </Text>
                 </View>
-
-                {items.map((item) => (
-                  <View key={item.key} style={styles.mobileTotalRow}>
-                    <Text style={styles.mobileTotalLabel}>{item.label}:</Text>
-                    <Text style={styles.mobileTotalValue}>{formatCurrency(item.value)}</Text>
-                  </View>
-                ))}
-
-                <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.borderSoft, paddingTop: 8, marginTop: 4 }]}>
-                  <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collection:</Text>
-                  <Text style={[styles.mobileTotalValue, { fontFamily: fonts.bold, color: colors.primary, fontSize: 14 }]}>
-                    {formatCurrency(row.total_collection)}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
-
-          {dailyTotals && dailyRows.length > 1 && (
-            <View style={styles.mobileTotalCard}>
-              <Text style={styles.mobileTotalTitle}>Daily Scope Aggregate</Text>
-
-              {getCategoryItems(dailyTotals).map((item) => (
-                <View key={item.key} style={styles.mobileTotalRow}>
-                  <Text style={styles.mobileTotalLabel}>Total {item.label}:</Text>
-                  <Text style={styles.mobileTotalValue}>{formatCurrency(item.value)}</Text>
-                </View>
-              ))}
-
-              <View style={[styles.mobileTotalRow, { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, marginTop: 4 }]}>
-                <Text style={[styles.mobileTotalLabel, { fontFamily: fonts.bold, color: colors.foreground }]}>Total Collections:</Text>
-                <Text style={[styles.mobileTotalValue, { fontFamily: fonts.bold, color: colors.primary, fontSize: 15 }]}>
-                  {formatCurrency(dailyTotals.total_collection)}
+                <Text style={[styles.breakdownValue, { color: "#10B981" }]}>
+                  {formatCurrency(row.amount)}
                 </Text>
               </View>
+            ))}
+
+            <View style={[styles.breakdownRow, styles.breakdownTotal]}>
+              <Text style={styles.breakdownLabelTotal}>Total Collection</Text>
+              <Text style={[styles.breakdownValueTotal, { color: "#10B981" }]}>
+                {formatCurrency(totalCollections)}
+              </Text>
             </View>
-          )}
+          </View>
         </View>
       )}
     </View>
   );
 }
 
-// ── 5. BreakdownTabContent ────────────────────────────────────────────────────
-interface BreakdownTabContentProps {
-  dailyTotals: any;
+// ── 5. ExpensesTabContent ─────────────────────────────────────────────────────
+interface ExpensesTabContentProps {
+  expenseRows: any[];
+  isTablet: boolean;
 }
 
-export function BreakdownTabContent({ dailyTotals }: BreakdownTabContentProps) {
-  if (!dailyTotals) {
+export function ExpensesTabContent({ expenseRows, isTablet }: ExpensesTabContentProps) {
+  const totalExpenses = useMemo(() => {
+    return expenseRows.reduce((sum, r) => sum + Number(r.amount ?? 0), 0);
+  }, [expenseRows]);
+
+  if (expenseRows.length === 0) {
     return (
-      <View style={styles.emptyTable}>
-        <Text style={styles.emptyTableTxt}>No data available</Text>
+      <View>
+        <Text style={styles.blockTitle}>Daily Expenses</Text>
+        <View style={styles.emptyTable}>
+          <Text style={styles.emptyTableTxt}>No expenses for this date</Text>
+        </View>
       </View>
     );
   }
 
-  // Get dynamic category items from the dailyTotals row
-  const ignoredKeys = [
-    "date",
-    "display_date",
-    "cash",
-    "cheque",
-    "bank_deposit",
-    "total_collection",
-    "expense_cash",
-    "expense_cheque",
-    "expense_total",
-  ];
-
-  const formatKeyLabel = (key: string) => {
-    return key
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
-
-  const getCategoryItems = (row: any) => {
-    const items: { key: string; label: string; value: number }[] = [];
-    let categorizedSum = 0;
-
-    Object.keys(row).forEach((key) => {
-      if (!ignoredKeys.includes(key)) {
-        const val = Number(row[key] ?? 0);
-        if (val > 0) {
-          items.push({
-            key,
-            label: formatKeyLabel(key),
-            value: val,
-          });
-          categorizedSum += val;
-        }
-      }
-    });
-
-    const total = Number(row.total_collection ?? 0);
-    // const unallocated = total - categorizedSum;
-    // if (unallocated > 0.01) {
-    //   items.push({
-    //     key: "unallocated",
-    //     label: "Advance & Unallocated",
-    //     value: unallocated,
-    //   });
-    // }
-
-    return items;
-  };
-
-  const items = getCategoryItems(dailyTotals);
-
   return (
     <View>
-      <Text style={styles.blockTitle}>Revenue Stream Breakdown</Text>
-      <View style={styles.breakdownGrid}>
-        {items.map((item) => (
-          <View key={item.key} style={styles.breakdownRow}>
-            <Text style={styles.breakdownLabel}>{item.label}</Text>
-            <Text style={styles.breakdownValue}>{formatCurrency(item.value)}</Text>
+      <Text style={styles.blockTitle}>Daily Expenses</Text>
+
+      {isTablet ? (
+        // Tablet horizontal table layout
+        <View>
+          <View style={styles.tableHeader}>
+            <Text style={[styles.thTxt, { flex: 1.2 }]}>Voucher No</Text>
+            <Text style={[styles.thTxt, { flex: 2.5 }]}>Description / Party</Text>
+            <Text style={[styles.thTxt, { flex: 1, textAlign: "center" }]}>Status</Text>
+            <Text style={[styles.thTxt, { flex: 1.2, textAlign: "right" }]}>Amount</Text>
           </View>
-        ))}
-        <View style={[styles.breakdownRow, styles.breakdownTotal]}>
-          <Text style={styles.breakdownLabelTotal}>Total Collection</Text>
-          <Text style={styles.breakdownValueTotal}>
-            {formatCurrency(dailyTotals.total_collection ?? 0)}
-          </Text>
+
+          {expenseRows.map((row: any, idx: number) => (
+            <View key={idx} style={styles.tableRow}>
+              <Text style={[styles.tdTxt, { flex: 1.2 }]}>{row.number || row.id}</Text>
+              <Text style={[styles.tdTxt, { flex: 2.5 }]}>
+                {row.party}{row.description ? ` - ${row.description}` : ""}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1, textAlign: "center", textTransform: "capitalize" }]}>
+                {row.status || "Posted"}
+              </Text>
+              <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", color: colors.destructive }]}>
+                {formatCurrency(row.amount)}
+              </Text>
+            </View>
+          ))}
+
+          <View style={styles.tableTotalsRow}>
+            <Text style={[styles.totalsLabelTxt, { flex: 4.7 }]}>Total Expenses</Text>
+            <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right", color: colors.destructive }]}>
+              {formatCurrency(totalExpenses)}
+            </Text>
+          </View>
         </View>
-      </View>
+      ) : (
+        // Mobile vertical list layout (matching breakdown styling)
+        <View>
+          <View style={styles.breakdownGrid}>
+            {expenseRows.map((row: any, idx: number) => (
+              <View key={idx} style={styles.breakdownRow}>
+                <View style={{ flex: 1, marginRight: 16 }}>
+                  <Text style={styles.breakdownLabel} numberOfLines={2}>
+                    {row.party || "Expense"}
+                  </Text>
+                  {row.description ? (
+                    <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.mutedForeground, marginTop: 2 }}>
+                      {row.description}
+                    </Text>
+                  ) : null}
+                  <Text style={{ fontFamily: fonts.regular, fontSize: 10, color: colors.mutedForeground, marginTop: 2 }}>
+                    Voucher: {row.number || row.id}
+                  </Text>
+                </View>
+                <Text style={[styles.breakdownValue, { color: colors.destructive }]}>
+                  {formatCurrency(row.amount)}
+                </Text>
+              </View>
+            ))}
+
+            <View style={[styles.breakdownRow, styles.breakdownTotal]}>
+              <Text style={styles.breakdownLabelTotal}>Total Expenses</Text>
+              <Text style={[styles.breakdownValueTotal, { color: colors.destructive }]}>
+                {formatCurrency(totalExpenses)}
+              </Text>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -778,6 +637,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 12.5,
     color: colors.foregroundSoft,
+    flex: 1,
+    marginRight: 16,
   },
   mobileTotalValue: {
     fontFamily: fonts.bold,
@@ -798,6 +659,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 13,
     color: colors.foregroundSoft,
+    flex: 1,
+    marginRight: 16,
   },
   breakdownValue: {
     fontFamily: fonts.bold,

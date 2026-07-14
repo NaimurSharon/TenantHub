@@ -27,10 +27,10 @@ import {
   DateSelector,
   BalancesTabContent,
   CollectionsTabContent,
-  BreakdownTabContent,
+  ExpensesTabContent,
 } from "@/components/reports/DailyReportComponents";
 
-type ActiveReportTab = "balances" | "collections" | "breakdown";
+type ActiveReportTab = "balances" | "collections" | "expenses";
 
 export default function DailyReportsScreen() {
   const insets = useSafeAreaInsets();
@@ -93,78 +93,12 @@ export default function DailyReportsScreen() {
     expense_count: 0,
   };
 
+  const balances = report?.cash_bank_balances?.rows || [];
+  const balanceTotals = report?.cash_bank_balances?.totals || { opening: 0, closing: 0 };
   const receiptRows = report?.receipt_rows || [];
+  const expenseRows = report?.expense_rows || [];
 
-  // Group receipts by date and category dynamically
-  const dailyRows = useMemo(() => {
-    if (!receiptRows || receiptRows.length === 0) return [];
 
-    const groups: Record<string, any> = {};
-
-    receiptRows.forEach((r: any) => {
-      const date = r.date || dateStr;
-      if (!groups[date]) {
-        // Format display date (e.g. "2026-07-09" -> "09/07/2026")
-        let display_date = date;
-        if (date.includes("-")) {
-          const parts = date.split("-");
-          if (parts.length === 3) {
-            display_date = `${parts[2]}/${parts[1]}/${parts[0]}`;
-          }
-        }
-        groups[date] = {
-          date,
-          display_date,
-          cash: 0,
-          cheque: 0,
-          bank_deposit: 0,
-          total_collection: 0,
-        };
-      }
-
-      const row = groups[date];
-      const amount = Number(r.amount ?? 0);
-      row.total_collection += amount;
-
-      // Group by payment method
-      const method = (r.method || "").toLowerCase();
-      if (method.includes("cash")) {
-        row.cash += amount;
-      } else if (method.includes("cheque")) {
-        row.cheque += amount;
-      } else {
-        row.bank_deposit += amount;
-      }
-
-      // Group by category (report_type)
-      const category = r.report_type || "Others";
-      row[category] = (row[category] || 0) + amount;
-    });
-
-    return Object.values(groups);
-  }, [receiptRows, dateStr]);
-
-  // Compute dailyTotals from dailyRows
-  const dailyTotals = useMemo(() => {
-    if (dailyRows.length === 0) return null;
-
-    const totals: any = {
-      cash: 0,
-      cheque: 0,
-      bank_deposit: 0,
-      total_collection: 0,
-    };
-
-    dailyRows.forEach((row: any) => {
-      Object.keys(row).forEach((key) => {
-        if (key !== "date" && key !== "display_date") {
-          totals[key] = (totals[key] || 0) + row[key];
-        }
-      });
-    });
-
-    return totals;
-  }, [dailyRows]);
 
   const handleBackToRouter = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -251,12 +185,11 @@ export default function DailyReportsScreen() {
           </View>
         )}
 
-        {/* Tabs Bar */}
         <TabBar
           tabs={[
-            { id: "balances", label: "Cash & Bank Balances" },
-            { id: "collections", label: "Collections Summary" },
-            { id: "breakdown", label: "Daily Category Totals" },
+            { id: "balances", label: "Balances" },
+            { id: "collections", label: "Collections" },
+            { id: "expenses", label: "Expenses" },
           ]}
           activeTab={activeTab}
           onTabChange={handleTabChange}
@@ -276,12 +209,14 @@ export default function DailyReportsScreen() {
             />
           ) : activeTab === "collections" ? (
             <CollectionsTabContent
-              dailyRows={dailyRows}
-              dailyTotals={dailyTotals}
+              receiptRows={receiptRows}
               isTablet={isTablet}
             />
           ) : (
-            <BreakdownTabContent dailyTotals={dailyTotals} />
+            <ExpensesTabContent
+              expenseRows={expenseRows}
+              isTablet={isTablet}
+            />
           )}
         </View>
       </ScrollView>
