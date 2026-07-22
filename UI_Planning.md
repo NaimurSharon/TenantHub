@@ -1,61 +1,91 @@
+# Modal Overlay Animation Fix
 
-# ARCHITECTURAL BLUEPRINT FOR SYSTEM EXPANSION
+## Problem
 
-## 1. Context & Objective
+Bottom-sheet modals used React Native's `animationType="slide"` while their dark backdrop and card were rendered inside the same modal view. React Native therefore animated the complete view as one unit from the bottom. The backdrop visibly slid upward with the card instead of fading into place.
 
-* **Current State:** The application is tightly coupled to a single domain (**TenantHub**). Upon successful authentication, the user is directly routed into the TenantHub dashboard and its nested page ecosystem.
-* **Target State:** Transition the application from a single-tenant domain architecture into a **Multi-Hub Workspace**. The root-level post-authentication screen must now act as a high-fidelity **Hub Router/Selector**.
-* **The Hubs:**
-1. **TenantHub (Existing):** Retain 100% of its current state, routing, data-fetching, and UI. It must remain completely untouched and functional when selected.
-2. **Financial Hub (New):** A brand new domain based on provided UI assets.
-3. **Daily Reports (New):** A brand new domain based on provided UI assets.
+## Root Cause
 
+`animationType="slide"` controls the entire transparent modal content tree. Because the backdrop and sheet card shared that tree, they could not have independent animations.
 
+## Solution
 
----
+The slide animation was replaced with a reusable hook:
 
-## 2. Core Technical Architecture Requirements
+- `mobile/src/hooks/useSheetAnimation.ts`
 
-### A. Root Routing & State Management
+Each bottom sheet now uses this structure:
 
-* **Decouple the Post-Login Flow:** Intercept the post-login routing. Instead of automatically mounting the `TenantHub` root view, mount a new **Hub Selector Screen**.
-* **Isolation of Concerns:** Ensure that each Hub operates in its own isolated module/directory structure (e.g., `/features/tenant-hub`, `/features/financial-hub`, `/features/daily-reports`). Do not leak state or styles between them.
-* **Back-Navigation Rules:** Inside `Financial Hub` or `Daily Reports`, the "Back" or "Home" navigation should gracefully return the user to the central **Hub Selector Screen**, not log them out.
+```tsx
+<Modal visible={visible} animationType="none" transparent>
+  <Animated.View
+    pointerEvents="none"
+    style={[
+      StyleSheet.absoluteFill,
+      {
+        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+        opacity: backdrop,
+      },
+    ]}
+  />
 
-### B. UI/UX Paradigm: TenantHub as the Global Design System
+  <TouchableOpacity
+    style={StyleSheet.absoluteFill}
+    activeOpacity={1}
+    onPress={() => close(dismiss)}
+  />
 
-* **Inherit the Existing UI System:** Do NOT invent a new design language or look for the new hubs. Use the exact same design tokens, color palette, typography scales, layout grids, container rounding, paddings, margins, shadows, and button styles currently used in **TenantHub**.
-* **Seamless Consistency:** The Financial Hub and Daily Reports must feel like native extensions of TenantHub, sharing the exact same premium visual identity.
+  <View style={{ flex: 1, justifyContent: 'flex-end' }} pointerEvents="box-none">
+    <Animated.View style={[styles.sheet, { transform: [{ translateY: card }] }]}>
+      {/* sheet content */}
+    </Animated.View>
+  </View>
+</Modal>
+```
 
-### C. Image Utilization Strategy (Data & Schema Mining)
+### Animation behavior
 
-You will be provided with images of the new user interfaces for the **Financial Hub** and **Daily Reports**. Process these images under these strict directives:
+- Backdrop opacity: `0` to `1` over `280ms`
+- Card position: screen height to `0` over `360ms`
+- Card easing: `Easing.out(Easing.poly(4))`
+- Close backdrop fade: `200ms`
+- Close card slide: `260ms`
+- Native driver enabled for all animations
 
-* **UI Layout & Idea Extraction:** Look at the images to understand the layout structure (e.g., cards, lists, tabs, charts) and the underlying user experience intent.
-* **Data Type & Schema Mapping:** Analyze the text, numbers, metrics, and labels inside the images to infer the exact data models and TypeScript types/interfaces needed to back these screens.
-* **Synthesis:** Recreate the exact structural layout and data requirements seen in the images, but render them completely using the existing **TenantHub styling system and UI components**.
+The card and backdrop run in parallel, so the overlay fades in while only the sheet moves upward.
 
----
+## Updated Screens
 
-## 3. Step-by-Step Execution Plan for the AI
+- `mobile/src/app/(admin)/attendance.tsx`
+  - Date filter sheet
+  - Attendance detail sheet with swipe-to-dismiss
+- `mobile/src/app/(admin)/employee-report.tsx`
+  - Employee detail sheet with swipe-to-dismiss
+- `mobile/src/app/(employee)/history.tsx`
+  - Daily logs sheet with swipe-to-dismiss
+- `mobile/src/app/(admin)/geofencing.tsx`
+  - Create geofence sheet
+  - Edit geofence sheet
+- `mobile/src/app/(admin)/home.tsx`
+  - All attendance activities sheet
+- `mobile/src/app/(employee)/leaves.tsx`
+  - Leave request sheet
+- `mobile/src/app/(admin)/personnel.tsx`
+  - Employee detail is a centered dialog, so it uses `animationType="fade"` rather than a bottom-sheet animation.
 
-To complete this task in one single, correct approach, execute the following sequence:
+## Interaction Details
 
-* **Step 1 [Analysis]:** Analyze the existing codebase's routing file (e.g., `AppNavigator`, `routes.ts`, or main tab controller) to locate exactly where the user is sent post-login.
-* **Step 2 [Refactor Routing]:** Create a new `HubSelectorScreen`. Divert the post-login route to this screen.
-* **Step 3 [Preserve TenantHub]:** Wire the "TenantHub" button on the new selector screen to trigger the exact original entry routing logic, ensuring zero regressions.
-* **Step 4 [Data Modeling]:** Extract data points from the provided Financial Hub and Daily Reports images. Create the corresponding mock data arrays, objects, and type definitions.
-* **Step 5 [UI Synthesis - Financial Hub]:** Build the Financial Hub screen by mapping the extracted data structure onto existing TenantHub-styled UI components.
-* **Step 6 [UI Synthesis - Daily Reports]:** Build the Daily Reports screen using the same pattern (Image Data Blueprint + TenantHub Styles).
-* **Step 7 [Wiring]:** Connect the respective buttons on the `HubSelectorScreen` to route to these two newly created modules.
+- Tapping outside a sheet closes it through the animated `close()` helper.
+- Header close/cancel actions use the same close animation.
+- Existing pan-to-dismiss behavior remains available for attendance, employee report, and history detail sheets.
+- `pointerEvents="none"` keeps the animated backdrop from intercepting touches.
+- `pointerEvents="box-none"` allows the sheet card to receive touches while empty space remains dismissible.
 
----
+## Follow-up Fix
 
-> ### 🛑 CRITICAL EXECUTION GUARDRAILS FOR THE AI
-> 
-> 
-> * **Do NOT break or rewrite** any existing `TenantHub` components, API calls, or state managers. It is a black box that must remain functional.
-> * **Do NOT use placeholder code** or `// TODO` comments for the UI. Translate the provided images into fully realized, production-ready frontend code.
-> * **Do NOT deviate from TenantHub's styling.** If TenantHub uses a specific dark mode, neon tone, or font spacing, apply those exact same rules to the new hubs.
-> 
-> 
+The geofencing screen already had a business function named `openEdit`. The animation hook initially introduced a second `openEdit` declaration, causing a Babel syntax error. The hook methods were renamed locally to `openEditSheet` and `closeEditSheet` to remove the collision.
+
+## Verification
+
+- Confirmed there are no remaining `animationType="slide"` modals under `mobile/src/app`.
+- Type and compile diagnostics reported no errors after the geofencing naming fix.

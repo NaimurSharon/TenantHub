@@ -22,6 +22,7 @@ import {
   Pressable,
   Modal,
   TouchableWithoutFeedback,
+  TouchableOpacity,
   Animated,
   Easing,
   Platform,
@@ -191,77 +192,81 @@ export const CalendarPicker = forwardRef<CalendarPickerRef, CalendarPickerProps>
     return (
       <Modal visible={visible} transparent animationType="none" onRequestClose={() => runClose()} statusBarTranslucent>
         {/* Dimmed backdrop */}
-        <Animated.View style={[styles.overlay, { opacity: backdropAnim }]} pointerEvents="box-none">
-          <TouchableWithoutFeedback onPress={() => runClose()}>
-            <View style={StyleSheet.absoluteFill} />
-          </TouchableWithoutFeedback>
-        </Animated.View>
+        <Animated.View style={[styles.overlay, { opacity: backdropAnim }]} pointerEvents="none" />
 
-        {/* Spring-animated sheet */}
-        <Animated.View
-          style={[
-            styles.sheet,
-            {
-              transform: [{
-                translateY: sheetAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [SHEET_HEIGHT + 60, 0],
-                }),
-              }],
-              opacity: sheetAnim.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }),
-            },
-          ]}
-        >
-          {/* Handle */}
-          <View style={styles.handle} />
+        <TouchableOpacity
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1}
+          onPress={() => runClose()}
+        />
 
-          {/* Month nav */}
-          <View style={styles.monthRow}>
-            <Pressable onPress={prevMonth} hitSlop={16} style={({ pressed }) => [styles.navBtn, pressed && styles.navBtnPressed]}>
-              <ChevronLeft size={20} color={colors.foreground} />
-            </Pressable>
-            <Animated.Text style={[styles.monthTitle, { opacity: gridOpacity }]}>
-              {MONTH_NAMES[pickerMonth]} {pickerYear}
-            </Animated.Text>
-            <Pressable onPress={nextMonth} hitSlop={16} style={({ pressed }) => [styles.navBtn, pressed && styles.navBtnPressed]}>
-              <ChevronRight size={20} color={colors.foreground} />
-            </Pressable>
-          </View>
+        <View style={{ flex: 1, justifyContent: "flex-end" }} pointerEvents="box-none">
+          {/* Spring-animated sheet */}
+          <Animated.View
+            style={[
+              styles.sheet,
+              {
+                transform: [{
+                  translateY: sheetAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [SHEET_HEIGHT + 60, 0],
+                  }),
+                }],
+                opacity: sheetAnim.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }),
+              },
+            ]}
+          >
+            {/* Handle */}
+            <View style={styles.handle} />
 
-          {/* Day labels */}
-          <View style={styles.dayLabels}>
-            {DAY_LABELS.map((d) => <Text key={d} style={styles.dayLabel}>{d}</Text>)}
-          </View>
+            {/* Month nav */}
+            <View style={styles.monthRow}>
+              <Pressable onPress={prevMonth} hitSlop={16} style={({ pressed }) => [styles.navBtn, pressed && styles.navBtnPressed]}>
+                <ChevronLeft size={20} color={colors.foreground} />
+              </Pressable>
+              <Animated.Text style={[styles.monthTitle, { opacity: gridOpacity }]}>
+                {MONTH_NAMES[pickerMonth]} {pickerYear}
+              </Animated.Text>
+              <Pressable onPress={nextMonth} hitSlop={16} style={({ pressed }) => [styles.navBtn, pressed && styles.navBtnPressed]}>
+                <ChevronRight size={20} color={colors.foreground} />
+              </Pressable>
+            </View>
 
-          {/* Date grid */}
-          <Animated.View style={[styles.grid, { transform: [{ translateX: gridSlide }], opacity: gridOpacity }]}>
-            {calendarGrid.map((day, idx) => {
-              if (day === null) return <View key={`b-${idx}`} style={styles.calCell} />;
-              const isSel = day === selectedDate.getDate() && pickerMonth === selectedDate.getMonth() && pickerYear === selectedDate.getFullYear();
-              const isTod = day === today.getDate() && pickerMonth === today.getMonth() && pickerYear === today.getFullYear();
-              return <DayCell key={`d-${idx}`} day={day} isSelected={isSel} isToday={isTod} onPress={() => selectDay(day)} />;
-            })}
+            {/* Day labels */}
+            <View style={styles.dayLabels}>
+              {DAY_LABELS.map((d) => <Text key={d} style={styles.dayLabel}>{d}</Text>)}
+            </View>
+
+            {/* Date grid */}
+            <Animated.View style={[styles.grid, { transform: [{ translateX: gridSlide }], opacity: gridOpacity }]}>
+              {calendarGrid.map((day, idx) => {
+                if (day === null) return <View key={`b-${idx}`} style={styles.calCell} />;
+                const isSel = day === selectedDate.getDate() && pickerMonth === selectedDate.getMonth() && pickerYear === selectedDate.getFullYear();
+                const isTod = day === today.getDate() && pickerMonth === today.getMonth() && pickerYear === today.getFullYear();
+                return <DayCell key={`d-${idx}`} day={day} isSelected={isSel} isToday={isTod} onPress={() => selectDay(day)} />;
+              })}
+            </Animated.View>
+
+            {/* Footer */}
+            <View style={styles.footer}>
+              <Pressable
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  runClose(() => onDateSelect(new Date()));
+                }}
+                style={({ pressed }) => [styles.todayBtn, pressed && { opacity: 0.8 }]}
+              >
+                <Text style={styles.todayBtnText}>Today</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => runClose()}
+                style={({ pressed }) => [styles.cancelBtn, pressed && { opacity: 0.7 }]}
+              >
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </Pressable>
+            </View>
           </Animated.View>
-
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Pressable
-              onPress={() => {
-                Haptics.selectionAsync();
-                runClose(() => onDateSelect(new Date()));
-              }}
-              style={({ pressed }) => [styles.todayBtn, pressed && { opacity: 0.8 }]}
-            >
-              <Text style={styles.todayBtnText}>Today</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => runClose()}
-              style={({ pressed }) => [styles.cancelBtn, pressed && { opacity: 0.7 }]}
-            >
-              <Text style={styles.cancelBtnText}>Cancel</Text>
-            </Pressable>
-          </View>
-        </Animated.View>
+        </View>
       </Modal>
     );
   }

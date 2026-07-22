@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Animated,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text } from "@/components/ui/Text";
@@ -26,6 +27,7 @@ import {
   type SortField,
   type SortOrder,
 } from "@/store/useFilterStore";
+import { useSheetAnimation } from "@/hooks/useSheetAnimation";
 
 interface FilterSheetProps {
   visible: boolean;
@@ -48,6 +50,10 @@ const ORDER_OPTIONS: { key: SortOrder; label: string }[] = [
 export function FilterSheet({ visible, onClose }: FilterSheetProps) {
   const store = useFilterStore();
   const insets = useSafeAreaInsets();
+  const { modalVisible, backdrop, card, close } = useSheetAnimation(
+    visible,
+    onClose,
+  );
 
   // Local state so changes aren't applied until "Apply"
   const [unit, setUnit] = useState(store.unit);
@@ -79,176 +85,200 @@ export function FilterSheet({ visible, onClose }: FilterSheetProps) {
       balMax ? parseFloat(balMax) : null,
     );
     store.setSort(sortBy, sortOrder);
-    onClose();
+    close();
   };
 
   const handleReset = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     store.reset();
-    onClose();
+    close();
   };
+
+  if (!modalVisible) return null;
 
   return (
     <Modal
-      visible={visible}
+      visible={modalVisible}
       transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={() => close()}
       statusBarTranslucent
     >
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: "rgba(15, 23, 42, 0.55)",
+            opacity: backdrop,
+          },
+        ]}
+      />
+
+      <TouchableOpacity
+        style={StyleSheet.absoluteFill}
+        activeOpacity={1}
+        onPress={() => close()}
+      />
+
+      <View
+        style={{ flex: 1, justifyContent: "flex-end" }}
+        pointerEvents="box-none"
       >
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <View style={[styles.sheet, { paddingBottom: insets.bottom + 8 }]}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Filters</Text>
-          <Pressable onPress={onClose} hitSlop={12}>
-            <X size={22} color={colors.mutedForeground} />
-          </Pressable>
-        </View>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          contentContainerStyle={{ paddingBottom: 8 }}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ width: "100%", maxHeight: "90%" }}
         >
-          {/* Unit */}
-          <Input
-            label="Unit"
-            placeholder="e.g. 4TH-10"
-            value={unit}
-            onChangeText={setUnit}
-            autoCapitalize="characters"
-          />
-
-          {/* Balance Range */}
-          <Text style={styles.sectionLabel}>Balance Range</Text>
-          <View style={styles.rangeRow}>
-            <View style={{ flex: 1 }}>
-              <Input
-                placeholder="Min"
-                value={balMin}
-                onChangeText={setBalMin}
-                keyboardType="decimal-pad"
-              />
-            </View>
-            <Text style={styles.rangeSep}>—</Text>
-            <View style={{ flex: 1 }}>
-              <Input
-                placeholder="Max"
-                value={balMax}
-                onChangeText={setBalMax}
-                keyboardType="decimal-pad"
-              />
-            </View>
-          </View>
-
-          {/* Sort By */}
-          <Text style={styles.sectionLabel}>Sort By</Text>
-          <View style={styles.chipRow}>
-            {SORT_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.key}
-                onPress={() => setSortBy(opt.key)}
-                style={[
-                  styles.chip,
-                  sortBy === opt.key && styles.chipActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.chipText,
-                    sortBy === opt.key && styles.chipTextActive,
-                  ]}
-                >
-                  {opt.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Sort Order */}
-          <Text
+          <Animated.View
             style={[
-              styles.sectionLabel,
-              sortBy === "longestOverdue" && { opacity: 0.5 },
+              styles.sheet,
+              {
+                transform: [{ translateY: card }],
+                paddingBottom: insets.bottom + 8,
+              },
             ]}
           >
-            Order
-          </Text>
-          <View style={styles.chipRow}>
-            {ORDER_OPTIONS.map((opt) => {
-              const isOptionActive = sortOrder === opt.key && sortBy !== "longestOverdue";
-              return (
-                <TouchableOpacity
-                  key={opt.key}
-                  disabled={sortBy === "longestOverdue"}
-                  onPress={() => setSortOrder(opt.key)}
-                  style={[
-                    styles.chip,
-                    isOptionActive && styles.chipActive,
-                    sortBy === "longestOverdue" && styles.chipDisabled,
-                  ]}
-                >
-                  <Text
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Filters</Text>
+              <Pressable onPress={() => close()} hitSlop={12}>
+                <X size={22} color={colors.mutedForeground} />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+              contentContainerStyle={{ paddingBottom: 8 }}
+            >
+              {/* Unit */}
+              <Input
+                label="Unit"
+                placeholder="e.g. 4TH-10"
+                value={unit}
+                onChangeText={setUnit}
+                autoCapitalize="characters"
+              />
+
+              {/* Balance Range */}
+              <Text style={styles.sectionLabel}>Balance Range</Text>
+              <View style={styles.rangeRow}>
+                <View style={{ flex: 1 }}>
+                  <Input
+                    placeholder="Min"
+                    value={balMin}
+                    onChangeText={setBalMin}
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+                <Text style={styles.rangeSep}>—</Text>
+                <View style={{ flex: 1 }}>
+                  <Input
+                    placeholder="Max"
+                    value={balMax}
+                    onChangeText={setBalMax}
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+              </View>
+
+              {/* Sort By */}
+              <Text style={styles.sectionLabel}>Sort By</Text>
+              <View style={styles.chipRow}>
+                {SORT_OPTIONS.map((opt) => (
+                  <TouchableOpacity
+                    key={opt.key}
+                    onPress={() => setSortBy(opt.key)}
                     style={[
-                      styles.chipText,
-                      isOptionActive && styles.chipTextActive,
-                      sortBy === "longestOverdue" && styles.chipTextDisabled,
+                      styles.chip,
+                      sortBy === opt.key && styles.chipActive,
                     ]}
                   >
-                    {opt.label}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
+                    <Text
+                      style={[
+                        styles.chipText,
+                        sortBy === opt.key && styles.chipTextActive,
+                      ]}
+                    >
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-        {/* Actions */}
-        <View style={styles.actions}>
-          <TouchableOpacity
-            onPress={handleReset}
-            style={styles.resetBtn}
-            activeOpacity={0.75}
-          >
-            <Text style={styles.resetBtnText}>Reset</Text>
-          </TouchableOpacity>
-          <Button
-            variant="default"
-            size="default"
-            onPress={handleApply}
-            style={{ flex: 1 }}
-          >
-            Apply
-          </Button>
-        </View>
-        </View>
-      </KeyboardAvoidingView>
+              {/* Sort Order */}
+              <Text
+                style={[
+                  styles.sectionLabel,
+                  sortBy === "longestOverdue" && { opacity: 0.5 },
+                ]}
+              >
+                Order
+              </Text>
+              <View style={styles.chipRow}>
+                {ORDER_OPTIONS.map((opt) => {
+                  const isOptionActive =
+                    sortOrder === opt.key && sortBy !== "longestOverdue";
+                  return (
+                    <TouchableOpacity
+                      key={opt.key}
+                      disabled={sortBy === "longestOverdue"}
+                      onPress={() => setSortOrder(opt.key)}
+                      style={[
+                        styles.chip,
+                        isOptionActive && styles.chipActive,
+                        sortBy === "longestOverdue" && styles.chipDisabled,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.chipText,
+                          isOptionActive && styles.chipTextActive,
+                          sortBy === "longestOverdue" && styles.chipTextDisabled,
+                        ]}
+                      >
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </ScrollView>
+
+            {/* Actions */}
+            <View style={styles.actions}>
+              <TouchableOpacity
+                onPress={handleReset}
+                style={styles.resetBtn}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.resetBtnText}>Reset</Text>
+              </TouchableOpacity>
+              <Button
+                variant="default"
+                size="default"
+                onPress={handleApply}
+                style={{ flex: 1 }}
+              >
+                Apply
+              </Button>
+            </View>
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.1)",
-  },
   sheet: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
     backgroundColor: colors.surface,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingHorizontal: 20,
     paddingTop: 16,
-    maxHeight: "90%",
+    maxHeight: "100%",
     ...shadows.medium,
   },
   header: {
