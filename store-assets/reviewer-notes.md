@@ -1,7 +1,7 @@
-# Kader Tower — App Store Reviewer Notes
+# PM System — App Store Reviewer Notes
 
 ## App Overview
-Kader Tower is a **private, internal B2B property management application** for authorized staff at Kader Tower building operations. The app requires login credentials that are provisioned by the system administrator — there is no self-registration flow.
+PM System is a **private, internal B2B property management application** for authorized staff at PM System building operations. The app requires login credentials that are provisioned by the system administrator — there is no self-registration flow.
 
 ---
 

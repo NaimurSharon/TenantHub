@@ -1,4 +1,4 @@
-# Kader Tower — App Store Submission Checklist
+# PM System — App Store Submission Checklist
 
 Use this file to track the submission process step by step.
 
@@ -6,7 +6,7 @@ Use this file to track the submission process step by step.
 
 ## ✅ Pre-Built Fixes (Done by Agent)
 
-- [x] App renamed to **Kader Tower** in `app.json`
+- [x] App renamed to **PM System** in `app.json`
 - [x] Bundle ID changed to `com.kadertower.app`
 - [x] Android package changed to `com.kadertower.app`
 - [x] App icon, splash screen, and adaptive icon regenerated
@@ -34,7 +34,7 @@ Use this file to track the submission process step by step.
 
 ### Apple App Store Connect
 - [ ] Create a new **App Record** in App Store Connect
-  - Name: `Kader Tower`
+  - Name: `PM System`
   - Bundle ID: `com.kadertower.app`
   - SKU: `com.kadertower.app`
   - Primary Language: English
@@ -55,7 +55,7 @@ Use this file to track the submission process step by step.
 
 ### Google Play Console
 - [ ] Create a new **App** in Google Play Console
-  - App name: `Kader Tower`
+  - App name: `PM System`
   - Default language: English (US)
   - App or Game: App
   - Free or Paid: Free
@@ -84,7 +84,7 @@ Use this file to track the submission process step by step.
 
 ### Short Description (≤80 chars for Google Play)
 ```
-Manage tenants, finances, and daily reports for Kader Tower.
+Manage tenants, finances, and daily reports for PM System.
 ```
 
 ### Full Description

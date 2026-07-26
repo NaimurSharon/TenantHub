@@ -49,7 +49,7 @@ export default function HubSelectorScreen() {
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>KADER TOWER</Text>
+        <Text style={styles.headerTitle}>PM System</Text>
         <Pressable
           onPress={handleLogout}
           disabled={loggingOut}
@@ -73,7 +73,7 @@ export default function HubSelectorScreen() {
           <Text style={styles.welcomeLabel}>Welcome Back,</Text>
           <Text style={styles.userName}>{user?.name || "Administrator"}</Text>
           <Text style={styles.welcomeSub}>
-            Select a hub to manage Kader Tower properties
+            Select a hub to manage PM System properties
           </Text>
         </View>
 

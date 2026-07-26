@@ -193,7 +193,7 @@ export default function AddTenantScreen() {
 
         <Input
           label="Address"
-          placeholder="e.g. Level 2, Kader Tower"
+          placeholder="e.g. Level 2, PM System"
           value={form.address}
           onChangeText={(v) => updateField("address", v)}
           multiline

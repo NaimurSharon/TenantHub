@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Kader Tower",
+    "name": "PM System",
     "slug": "kader-tower",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -19,8 +19,8 @@
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "Kader Tower uses the camera to capture documents and photos for property records.",
-        "NSPhotoLibraryUsageDescription": "Kader Tower accesses your photo library to attach images to property records."
+        "NSCameraUsageDescription": "PM System uses the camera to capture documents and photos for property records.",
+        "NSPhotoLibraryUsageDescription": "PM System accesses your photo library to attach images to property records."
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [

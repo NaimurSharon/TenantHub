@@ -1,6 +1,6 @@
 # Expo EAS iOS Build & Submission Setup Guide
 
-This guide contains the configuration templates, credentials, and instructions for building and submitting iOS apps using the **Kader Tower Developer Account**. Use this as a blueprint for other mobile projects targeting the same Apple Developer account.
+This guide contains the configuration templates, credentials, and instructions for building and submitting iOS apps using the **PM System Developer Account**. Use this as a blueprint for other mobile projects targeting the same Apple Developer account.
 
 ---
 

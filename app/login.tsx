@@ -13,6 +13,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   Linking,
+  Image,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -73,10 +74,11 @@ export default function LoginScreen() {
       >
         {/* Branding */}
         <View style={styles.branding}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>KT</Text>
-          </View>
-          <Text style={styles.appName}>KADER TOWER</Text>
+          <Image
+            source={require("../assets/PM_SYSTEM_LOGO.png")}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
           <Text style={styles.tagline}>Property Management System</Text>
         </View>
 
@@ -177,19 +179,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 28,
   },
-  logo: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: "#2563EB",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 14,
-  },
-  logoText: {
-    fontFamily: fonts.bold,
-    fontSize: 24,
-    color: "#FFFFFF",
+  logoImage: {
+    width: 120,
+    height: 120,
   },
   appName: {
     fontFamily: fonts.bold,
@@ -201,7 +193,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 13,
     color: "#64748B",
-    marginTop: 4,
   },
   card: {
     backgroundColor: "#FFFFFF",

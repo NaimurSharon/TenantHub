@@ -320,7 +320,7 @@ export const api = {
   properties: {
     list: async () => {
       if (isReviewer()) {
-        return [{ id: 1, name: "Kader Tower" }];
+        return [{ id: 1, name: "PM System" }];
       }
       const res = await apiRequest<{ data: any[] }>("/properties");
       return res.data ?? [];
