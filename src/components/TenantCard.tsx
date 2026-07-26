@@ -58,25 +58,7 @@ export const TenantCard = React.memo(function TenantCard({ tenant }: TenantCardP
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      "Delete Tenant",
-      `Remove "${tenant.name}" permanently?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            deleteMutation.mutate(tenant.id, {
-              onSuccess: () =>
-                Toast.show({ type: "success", text1: "Tenant deleted" }),
-              onError: () =>
-                Toast.show({ type: "error", text1: "Failed to delete tenant" }),
-            });
-          },
-        },
-      ],
-    );
+    Toast.show({ type: "info", text1: "Deletion is currently disabled" });
   };
 
   return (

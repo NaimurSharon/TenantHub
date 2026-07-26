@@ -42,19 +42,7 @@ export const TenantRow = React.memo(function TenantRow({ tenant, selected, onPre
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            Alert.alert("Delete Tenant", `Remove "${tenant.name}" permanently?`, [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Delete",
-                style: "destructive",
-                onPress: () => {
-                  deleteMutation.mutate(tenant.id, {
-                    onSuccess: () => Toast.show({ type: "success", text1: "Tenant deleted" }),
-                    onError: () => Toast.show({ type: "error", text1: "Failed to delete" }),
-                  });
-                },
-              },
-            ]);
+            Toast.show({ type: "info", text1: "Deletion is currently disabled" });
           },
         },
         { text: "Cancel", style: "cancel" },

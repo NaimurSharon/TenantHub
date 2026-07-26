@@ -447,11 +447,11 @@ function ContactsTab({
                 <Pencil size={15} color={colors.primary} />
               </Pressable>
               <Pressable
-                onPress={() => deleteMutation.mutate(c.id)}
+                onPress={() => Toast.show({ type: "info", text1: "Deletion is currently disabled" })}
                 hitSlop={8}
-                style={styles.contactActionBtn}
+                style={[styles.contactActionBtn, { opacity: 0.4 }]}
               >
-                <Trash2 size={15} color={colors.destructive} />
+                <Trash2 size={15} color={colors.mutedForeground} />
               </Pressable>
             </View>
           </View>
