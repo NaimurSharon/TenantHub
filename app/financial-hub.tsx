@@ -11,6 +11,7 @@ import {
   BankSummaryCard,
   MovementsTable,
   MovementTabType,
+  CreateBankAccountSheet,
 } from "@/components/financial/FinancialComponents";
 
 export default function FinancialHubScreen() {
@@ -28,6 +29,7 @@ export default function FinancialHubScreen() {
   const [pageSize, setPageSize] = useState(25);
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
+  const [showCreateSheet, setShowCreateSheet] = useState(false);
 
   // ── Data Fetching ───────────────────────────────────────────
   const {
@@ -185,6 +187,7 @@ export default function FinancialHubScreen() {
             onToggleActive={setIsActive}
             onSelectBank={handleBankSelect}
             onBack={handleBackToRouter}
+            onAddNew={() => setShowCreateSheet(true)}
           />
           {renderDetail()}
         </View>
@@ -203,10 +206,16 @@ export default function FinancialHubScreen() {
               onToggleActive={setIsActive}
               onSelectBank={handleBankSelect}
               onBack={handleBackToRouter}
+              onAddNew={() => setShowCreateSheet(true)}
             />
           )}
         </View>
       )}
+
+      <CreateBankAccountSheet
+        visible={showCreateSheet}
+        onClose={() => setShowCreateSheet(false)}
+      />
     </View>
   );
 }

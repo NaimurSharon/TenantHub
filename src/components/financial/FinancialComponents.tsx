@@ -2,7 +2,7 @@
  * Financial Hub components — BankAccountCard, BankSidebar, BankSummaryCard,
  * MovementRow, MovementsTable.
  */
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -10,8 +10,15 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
+  Modal,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Animated,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import {
   ArrowLeft,
   Plus,
@@ -22,10 +29,15 @@ import {
   ChevronRight,
 } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { colors, fonts, radii, shadows } from "@/theme";
+import { api } from "@/lib/api";
 import { formatCurrency } from "@/lib/api/types";
 import { TabBar, TabItem } from "@/components/shared/TabBar";
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
+import { useSheetAnimation } from "@/hooks/useSheetAnimation";
 
 const ACC_WIDTH = 90;
 const BALANCE_WIDTH = 90;
@@ -79,12 +91,13 @@ interface BankSidebarProps {
   onToggleActive: (v: boolean) => void;
   onSelectBank: (id: number) => void;
   onBack: () => void;
+  onAddNew?: () => void;
 }
 
 export function BankSidebar({
   accounts, activeBankId, isLoading,
   isActive, search, onSearchChange, onToggleActive,
-  onSelectBank, onBack,
+  onSelectBank, onBack, onAddNew,
 }: BankSidebarProps) {
   return (
     <View style={styles.sidebar}>
@@ -93,7 +106,10 @@ export function BankSidebar({
         onBack={onBack}
         rightAction={
           <Pressable
-            onPress={() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              onAddNew?.();
+            }}
             hitSlop={12}
             style={styles.addNewBtn}
           >
@@ -459,4 +475,188 @@ const styles = StyleSheet.create({
   pageButtons: { flexDirection: "row", alignItems: "center", gap: 8 },
   arrowBtn: { borderWidth: 1, borderColor: colors.border, borderRadius: radii.sm, padding: 4, backgroundColor: colors.surface },
   pageNumberText: { fontFamily: fonts.bold, fontSize: 12, color: colors.foreground },
+  // Sheet Styles
+  createSheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    maxHeight: "100%",
+    ...shadows.medium,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  sheetTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 18,
+    color: colors.foreground,
+  },
+  sheetActions: {
+    flexDirection: "row",
+    paddingTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
 });
+
+// ── CreateBankAccountSheet ───────────────────────────────────────────────────
+export function CreateBankAccountSheet({
+  visible,
+  onClose,
+}: {
+  visible: boolean;
+  onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
+  const { modalVisible, backdrop, card, close } = useSheetAnimation(visible, onClose);
+
+  const [bankName, setBankName] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountNo, setAccountNo] = useState("");
+  const [initialBalance, setInitialBalance] = useState("");
+
+  const createMutation = useMutation({
+    mutationFn: (input: any) => api.financial.createAccount(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["bank-accounts"] });
+      Toast.show({ type: "success", text1: "Bank Account Created" });
+      resetForm();
+      close();
+    },
+    onError: (e: any) =>
+      Toast.show({ type: "error", text1: e.message || "Failed to create bank account" }),
+  });
+
+  const resetForm = () => {
+    setBankName("");
+    setAccountName("");
+    setAccountNo("");
+    setInitialBalance("");
+  };
+
+  const handleSubmit = () => {
+    if (!bankName.trim() || !accountNo.trim()) {
+      Toast.show({ type: "error", text1: "Bank Name and Account No are required" });
+      return;
+    }
+    createMutation.mutate({
+      bank_name: bankName.trim(),
+      account_name: accountName.trim() || bankName.trim(),
+      account_no: accountNo.trim(),
+      current_balance: initialBalance ? parseFloat(initialBalance) : 0,
+    });
+  };
+
+  if (!modalVisible) return null;
+
+  return (
+    <Modal
+      visible={modalVisible}
+      transparent
+      animationType="none"
+      onRequestClose={() => close()}
+      statusBarTranslucent
+    >
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: "rgba(15, 23, 42, 0.55)",
+            opacity: backdrop,
+          },
+        ]}
+      />
+
+      <TouchableOpacity
+        style={StyleSheet.absoluteFill}
+        activeOpacity={1}
+        onPress={() => close()}
+      />
+
+      <View style={{ flex: 1, justifyContent: "flex-end" }} pointerEvents="box-none">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ width: "100%", maxHeight: "90%" }}
+        >
+          <Animated.View
+            style={[
+              styles.createSheet,
+              {
+                transform: [{ translateY: card }],
+                paddingBottom: insets.bottom + 16,
+              },
+            ]}
+          >
+            {/* Header */}
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>New Bank Account</Text>
+              <Pressable onPress={() => close()} hitSlop={12}>
+                <X size={22} color={colors.mutedForeground} />
+              </Pressable>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 16 }}
+            >
+              <Input
+                label="Bank Name *"
+                placeholder="e.g. Emirates NBD"
+                value={bankName}
+                onChangeText={setBankName}
+              />
+              <Input
+                label="Account Name"
+                placeholder="e.g. Operating Account"
+                value={accountName}
+                onChangeText={setAccountName}
+              />
+              <Input
+                label="Account Number *"
+                placeholder="e.g. XXXXX1234"
+                value={accountNo}
+                onChangeText={setAccountNo}
+              />
+              <Input
+                label="Initial Balance"
+                placeholder="e.g. 0.00"
+                value={initialBalance}
+                onChangeText={setInitialBalance}
+                keyboardType="decimal-pad"
+              />
+            </ScrollView>
+
+            <View style={styles.sheetActions}>
+              <Button
+                variant="outline"
+                size="default"
+                onPress={() => close()}
+                style={{ flex: 1, marginRight: 8 }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                size="default"
+                onPress={handleSubmit}
+                loading={createMutation.isPending}
+                disabled={createMutation.isPending}
+                style={{ flex: 1 }}
+              >
+                Create
+              </Button>
+            </View>
+          </Animated.View>
+        </KeyboardAvoidingView>
+      </View>
+    </Modal>
+  );
+}

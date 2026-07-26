@@ -351,6 +351,28 @@ export const api = {
       const res = await apiRequest<{ data: { bank_account: any } }>(`/setting/bank-accounts/${accountId}`);
       return res.data?.bank_account ?? null;
     },
+    createAccount: async (input: {
+      bank_name: string;
+      account_name?: string;
+      account_no: string;
+      current_balance?: number;
+    }) => {
+      if (isReviewer()) {
+        const newAcc = {
+          id: Date.now(),
+          ...input,
+          current_balance: input.current_balance ?? 0,
+          currency: "AED",
+        };
+        MOCK_BANK_ACCOUNTS.push(newAcc);
+        return newAcc;
+      }
+      const res = await apiRequest<{ data: any }>("/setting/bank-accounts", {
+        method: "POST",
+        body: input,
+      });
+      return res.data;
+    },
   },
 
   reports: {
