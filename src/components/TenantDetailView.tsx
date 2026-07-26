@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Linking,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { Input } from "@/components/ui/Input";
@@ -20,6 +21,8 @@ import {
   Pencil,
   Trash2,
   ArrowLeft,
+  FileText,
+  ExternalLink,
 } from "lucide-react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
@@ -472,23 +475,56 @@ function DataListTab({ data, type }: { data: any[]; type: string }) {
     <View>
       <Text style={styles.tabCount}>{data.length} record{data.length !== 1 ? "s" : ""}</Text>
       {data.slice(0, 50).map((item, idx) => {
-        const label = item.number ?? item.invoice_no ?? item.receipt_no ?? item.label ?? `#${item.id ?? idx + 1}`;
+        const label = item.number ?? item.invoice_no ?? item.receipt_no ?? item.label ?? item.title ?? item.name ?? `#${item.id ?? idx + 1}`;
         const amount = Number(item.total_amount ?? item.amount ?? item.balance_amount ?? 0);
         const date = item.date ?? item.invoice_date ?? item.receipt_date ?? item.sort_date ?? item.created_at;
         const dateStr = date ? date.split("T")[0] : "";
         const status = item.status ?? "";
         const invoiceType = item.invoice_type ?? "";
 
+        // Check for accessible file URL
+        const fileUrl = item.file_url ?? item.url ?? item.file_path ?? item.document_url ?? item.attachment_url ?? item.pdf_url;
+
+        const handlePress = () => {
+          if (fileUrl) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Linking.openURL(fileUrl).catch(() => {
+              Toast.show({ type: "error", text1: "Unable to open document URL" });
+            });
+          }
+        };
+
+        const CardComponent = fileUrl ? Pressable : View;
+        const cardProps = fileUrl
+          ? {
+              onPress: handlePress,
+              style: ({ pressed }: { pressed: boolean }) => [
+                styles.dataCard,
+                pressed && { opacity: 0.8 },
+              ],
+            }
+          : { style: styles.dataCard };
+
         return (
-          <View key={item.id ?? idx} style={styles.dataCard}>
+          <CardComponent key={item.id ?? idx} {...(cardProps as any)}>
             <View style={styles.dataCardRow}>
               <View style={{ flex: 1, marginRight: 8 }}>
-                <Text style={styles.dataCardLabel} numberOfLines={1}>{label}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  {type === "document" && <FileText size={16} color={colors.primary} />}
+                  <Text style={styles.dataCardLabel} numberOfLines={1}>{label}</Text>
+                </View>
                 {invoiceType ? <Text style={styles.dataCardType}>{invoiceType}</Text> : null}
               </View>
-              <Text style={[styles.dataCardValue, amount < 0 && { color: colors.destructive }]}>
-                {formatCurrency(Math.abs(amount))}
-              </Text>
+              {amount !== 0 ? (
+                <Text style={[styles.dataCardValue, amount < 0 && { color: colors.destructive }]}>
+                  {formatCurrency(Math.abs(amount))}
+                </Text>
+              ) : fileUrl ? (
+                <View style={styles.viewDocBadge}>
+                  <Text style={styles.viewDocText}>Open</Text>
+                  <ExternalLink size={12} color={colors.primary} />
+                </View>
+              ) : null}
             </View>
             <View style={styles.dataCardFooter}>
               {dateStr ? <Text style={styles.dataCardDate}>{dateStr}</Text> : null}
@@ -508,7 +544,7 @@ function DataListTab({ data, type }: { data: any[]; type: string }) {
                 </View>
               ) : null}
             </View>
-          </View>
+          </CardComponent>
         );
       })}
       {data.length > 50 && (
@@ -692,6 +728,21 @@ const styles = StyleSheet.create({
   statusText: { fontFamily: fonts.medium, fontSize: 11, color: colors.foregroundSoft },
   statusTextPaid: { color: colors.success },
   statusTextPosted: { color: "#4F46E5" },
+
+  viewDocBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.primaryLight,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: radii.full,
+  },
+  viewDocText: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: colors.primary,
+  },
 
   // Contacts
   addContactBtn: {

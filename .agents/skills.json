@@ -1,0 +1,6 @@
+{
+  "entries": [
+    { "path": "mobile/.agents/skills" },
+    { "path": "backend/.agents/skills" }
+  ]
+}

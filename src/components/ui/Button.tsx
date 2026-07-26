@@ -24,7 +24,7 @@ const variants: Record<string, { bg: string; text: string; border?: string }> =
     secondary: { bg: colors.secondary, text: colors.secondaryForeground },
     destructive: { bg: colors.destructive, text: colors.destructiveLight },
     outline: {
-      bg: "transparent",
+      bg: colors.surface,
       text: colors.foreground,
       border: colors.border,
     },
@@ -66,7 +66,7 @@ export function Button({
           alignItems: "center",
           justifyContent: "center",
           opacity: disabled ? 0.5 : 1,
-          ...shadows.soft,
+          ...(variant !== "outline" && variant !== "ghost" ? shadows.soft : {}),
         },
         style,
       ]}

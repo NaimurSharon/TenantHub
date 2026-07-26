@@ -1,17 +1,15 @@
 /**
  * HTTP API client — production-ready fetch wrapper.
  *
- * Base URL: https://devbackendbms.siscotech.com/api
+ * Base URL: https://backendbms.siscotech.com/api/
  * Includes Authorization + x-selected-property-id headers automatically.
  */
 
 const getBaseUrl = (): string => {
   const envUrl = process.env.EXPO_PUBLIC_API_BASE;
-  if (envUrl) return envUrl;
-  return "https://devbackendbms.siscotech.com/api";
+  const url = envUrl || "https://backendbms.siscotech.com/api";
+  return url.replace(/\/+$/, "");
 };
-
-const API_BASE = getBaseUrl();
 
 const REQUEST_TIMEOUT_MS = 12_000;
 
@@ -36,7 +34,8 @@ interface RequestOptions {
 }
 
 function buildUrl(path: string, query?: RequestOptions["query"]): string {
-  const base = API_BASE.replace(/\/$/, "") + path;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const base = getBaseUrl() + normalizedPath;
   if (!query) return base;
   const params = new URLSearchParams();
   for (const [k, v] of Object.entries(query)) {

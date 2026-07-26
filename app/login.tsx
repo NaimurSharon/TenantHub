@@ -1,6 +1,3 @@
-/**
- * Login Screen
- */
 import React, { useState } from "react";
 import {
   View,
@@ -14,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Linking,
   Image,
+  useWindowDimensions,
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,6 +25,8 @@ import { api } from "@/lib/api";
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 600;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,98 +67,105 @@ export default function LoginScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 },
+          { paddingTop: insets.top + (isTablet ? 40 : 20), paddingBottom: insets.bottom + 20 },
         ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Branding */}
-        <View style={styles.branding}>
-          <Image
-            source={require("../assets/PM_SYSTEM_LOGO.png")}
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
-          <Text style={styles.tagline}>Property Management System</Text>
-        </View>
-
-        {/* Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardHeading}>Sign In</Text>
-          <Text style={styles.cardSub}>Enter your credentials to continue</Text>
-
-          {/* Email Field */}
-          <Text style={styles.fieldLabel}>Email</Text>
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="admin@example.com"
-              placeholderTextColor="#94A3B8"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoComplete="email"
+        <View style={[styles.container, isTablet && styles.tabletContainer]}>
+          {/* Branding */}
+          <View style={styles.branding}>
+            <Image
+              source={require("../assets/PM_SYSTEM_LOGO.png")}
+              style={[styles.logoImage, isTablet && styles.tabletLogoImage]}
+              resizeMode="contain"
             />
+            <Text style={styles.tagline}>Property Management System</Text>
           </View>
 
-          {/* Password Field */}
-          <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Password</Text>
-          <View style={styles.inputBox}>
-            <TextInput
-              style={[styles.textInput, { flex: 1 }]}
-              placeholder="••••••••"
-              placeholderTextColor="#94A3B8"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoComplete="password"
-            />
+          {/* Card */}
+          <View style={[styles.card, isTablet && styles.tabletCard]}>
+            <Text style={styles.cardHeading}>Sign In</Text>
+            <Text style={styles.cardSub}>Enter your credentials to continue</Text>
+
+            {/* Email Field */}
+            <Text style={styles.fieldLabel}>Email</Text>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="admin@example.com"
+                placeholderTextColor="#94A3B8"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+            </View>
+
+            {/* Password Field */}
+            <Text style={[styles.fieldLabel, { marginTop: 16 }]}>Password</Text>
+            <View style={styles.inputBox}>
+              <TextInput
+                style={[styles.textInput, { flex: 1 }]}
+                placeholder="••••••••"
+                placeholderTextColor="#94A3B8"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoComplete="password"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color="#94A3B8" />
+                ) : (
+                  <Eye size={20} color="#94A3B8" />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* === LOGIN BUTTON === */}
             <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+              style={[styles.loginButton, loading && { opacity: 0.7 }]}
             >
-              {showPassword ? (
-                <EyeOff size={20} color="#94A3B8" />
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
               ) : (
-                <Eye size={20} color="#94A3B8" />
+                <Text style={styles.loginButtonText}>Sign In</Text>
               )}
+            </TouchableOpacity>
+
+            {/* Clear */}
+            <TouchableOpacity
+              onPress={() => {
+                setEmail("");
+                setPassword("");
+              }}
+              style={styles.clearBtn}
+              hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
+            >
+              <Text style={styles.clearBtnText}>Clear Fields</Text>
             </TouchableOpacity>
           </View>
 
-          {/* === LOGIN BUTTON === */}
-          <TouchableOpacity
-            onPress={handleLogin}
-            disabled={loading}
-            activeOpacity={0.8}
-            style={[styles.loginButton, loading && { opacity: 0.7 }]}
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
-            ) : (
-              <Text style={styles.loginButtonText}>Sign In</Text>
-            )}
-          </TouchableOpacity>
-
-          {/* Clear */}
-          <TouchableOpacity
-            onPress={() => { setEmail(""); setPassword(""); }}
-            style={styles.clearBtn}
-            hitSlop={{ top: 8, bottom: 8, left: 16, right: 16 }}
-          >
-            <Text style={styles.clearBtnText}>Clear Fields</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Footer */}
-        <View style={styles.footerRow}>
-          <Text style={styles.footer}>Powered by SiscoTek  ·  </Text>
-          <TouchableOpacity
-            onPress={() => Linking.openURL("https://dev.kadertower.com/privacy-policy")}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Text style={styles.privacyLink}>Privacy Policy</Text>
-          </TouchableOpacity>
+          {/* Footer */}
+          <View style={styles.footerRow}>
+            <Text style={styles.footer}>Powered by SiscoTek  ·  </Text>
+            <TouchableOpacity
+              onPress={() =>
+                Linking.openURL("https://dev.kadertower.com/privacy-policy")
+              }
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.privacyLink}>Privacy Policy</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -173,7 +180,14 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
+  },
+  container: {
+    width: "100%",
+    alignSelf: "center",
+  },
+  tabletContainer: {
+    maxWidth: 480,
   },
   branding: {
     alignItems: "center",
@@ -182,6 +196,10 @@ const styles = StyleSheet.create({
   logoImage: {
     width: 120,
     height: 120,
+  },
+  tabletLogoImage: {
+    width: 140,
+    height: 140,
   },
   appName: {
     fontFamily: fonts.bold,
@@ -196,13 +214,19 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  tabletCard: {
+    padding: 32,
+    borderRadius: 24,
   },
   cardHeading: {
     fontFamily: fonts.bold,
@@ -281,3 +305,4 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
+

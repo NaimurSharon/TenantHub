@@ -1,6 +1,6 @@
 /**
  * API facade — all backend operations.
- * Connects to https://devbackendbms.siscotech.com/api
+ * Connects to process.env.EXPO_PUBLIC_API_BASE (https://backendbms.siscotech.com/api/)
  */
 import { apiRequest } from "./client";
 import { useAuthStore } from "@/store/useAuthStore";

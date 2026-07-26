@@ -213,7 +213,7 @@ export function BankSummaryCard({ bank, onMobileBack, isTablet }: BankSummaryCar
 }
 
 // ── MovementsTable ────────────────────────────────────────────────────────────
-export type MovementTabType = "all" | "transaction" | "transfer" | "documents" | "contacts" | "profile";
+export type MovementTabType = "all" | "transaction" | "transfer";
 
 interface MovementsTableProps {
   movements: any[];
@@ -234,11 +234,8 @@ interface MovementsTableProps {
 
 const MOVEMENT_TABS: TabItem<MovementTabType>[] = [
   { id: "all", label: "All" },
-  { id: "transaction", label: "Transaction" },
-  { id: "transfer", label: "Transfer" },
-  { id: "documents", label: "Documents 0" },
-  { id: "contacts", label: "Contacts 0" },
-  { id: "profile", label: "Profile" },
+  { id: "transaction", label: "Transactions" },
+  { id: "transfer", label: "Transfers" },
 ];
 
 export function MovementsTable({
@@ -246,16 +243,14 @@ export function MovementsTable({
   onTabChange, tableSearch, onSearchChange,
   isLoading, isTablet, currentPage, totalPages, pageSize, onPageChange, onRefresh,
 }: MovementsTableProps) {
-  const tabs = MOVEMENT_TABS.map((t) => t.id === "all" ? { ...t, label: `All ${allCount}` } : t);
+  const tabs = MOVEMENT_TABS.map((t) => t.id === "all" ? { ...t, label: `All (${allCount})` } : t);
 
   return (
     <View style={styles.detailSection}>
       <TabBar
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={(id) => {
-          if (["all", "transaction", "transfer"].includes(id)) onTabChange(id as MovementTabType);
-        }}
+        onTabChange={(id) => onTabChange(id)}
       />
 
       <View style={styles.movementsSection}>
