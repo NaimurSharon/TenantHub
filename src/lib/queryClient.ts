@@ -18,7 +18,7 @@
 import { QueryClient, dehydrate, hydrate } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const STORAGE_KEY = "kadertower.queryCache.v2";
+const STORAGE_KEY = "pmsystem.queryCache.v2";
 const MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 h — older entries discarded on hydration
 const SAVE_DEBOUNCE_MS = 1500;
 
