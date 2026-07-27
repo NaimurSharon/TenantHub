@@ -466,6 +466,7 @@ function ContactsTab({
 /* ── Generic Data List Tab ─────────────────────────────── */
 function DataListTab({ data, type }: { data: any[]; type: string }) {
   const currencySymbol = useAuthStore((s) => s.currencySymbol);
+  const dateFormat = useAuthStore((s) => s.dateFormat);
   if (!data || data.length === 0) {
     return (
       <View style={styles.emptyTab}>
@@ -481,7 +482,7 @@ function DataListTab({ data, type }: { data: any[]; type: string }) {
         const label = item.number ?? item.invoice_no ?? item.receipt_no ?? item.label ?? item.title ?? item.name ?? `#${item.id ?? idx + 1}`;
         const amount = Number(item.total_amount ?? item.amount ?? item.balance_amount ?? 0);
         const date = item.date ?? item.invoice_date ?? item.receipt_date ?? item.sort_date ?? item.created_at;
-        const dateStr = formatDate(date);
+        const dateStr = formatDate(date, dateFormat);
         const status = item.status ?? "";
         const invoiceType = item.invoice_type ?? "";
 

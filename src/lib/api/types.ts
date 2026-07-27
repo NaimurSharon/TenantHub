@@ -248,7 +248,17 @@ export function formatDate(
 
   if (isNaN(d.getTime())) return String(dateInput);
 
-  const fmt = pattern || activeDateFormat;
+  let fmt = pattern;
+  if (!fmt) {
+    try {
+      const { useAuthStore } = require("@/store/useAuthStore");
+      fmt = useAuthStore.getState()?.dateFormat;
+    } catch {
+      fmt = activeDateFormat;
+    }
+  }
+  if (!fmt) fmt = activeDateFormat;
+
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");

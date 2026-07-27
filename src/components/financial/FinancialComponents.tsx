@@ -254,12 +254,16 @@ const MOVEMENT_TABS: TabItem<MovementTabType>[] = [
   { id: "transfer", label: "Transfers" },
 ];
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 export function MovementsTable({
   movements, filteredTotal, activeTab, allCount,
   onTabChange, tableSearch, onSearchChange,
   isLoading, isTablet, currentPage, totalPages, pageSize, onPageChange, onRefresh,
 }: MovementsTableProps) {
   const tabs = MOVEMENT_TABS.map((t) => t.id === "all" ? { ...t, label: `All (${allCount})` } : t);
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
+  const dateFormat = useAuthStore((s) => s.dateFormat);
 
   return (
     <View style={styles.detailSection}>
@@ -319,12 +323,12 @@ export function MovementsTable({
                 const isDebit = move.amount < 0;
                 return (
                   <View key={move.id} style={styles.tableDataRow}>
-                    <Text style={[styles.tdText, { flex: 1.2 }]}>{formatDate(move.date)}</Text>
+                    <Text style={[styles.tdText, { flex: 1.2 }]}>{formatDate(move.date, dateFormat)}</Text>
                     <Text style={[styles.tdText, { flex: 1 }]}>{move.type}</Text>
                     <Text style={[styles.tdText, { flex: 1.5 }]} numberOfLines={1}>{move.reference}</Text>
                     <Text style={[styles.tdText, { flex: 2 }]} numberOfLines={1}>{move.description}</Text>
                     <Text style={[styles.tdText, { flex: 1.2, textAlign: "right", fontFamily: fonts.bold }, isDebit ? { color: colors.destructive } : { color: colors.success }]}>
-                      {formatCurrency(move.amount)}
+                      {formatCurrency(move.amount, currencySymbol)}
                     </Text>
                     <View style={{ flex: 1, alignItems: "center" }}>
                       <View style={[styles.statusBadge, move.status === "posted" && { backgroundColor: "#EEF2FF" }]}>
@@ -348,11 +352,11 @@ export function MovementsTable({
                       <Text style={styles.mobileCardSub}>{move.type}</Text>
                     </View>
                     <Text style={[styles.mobileCardValue, isDebit ? { color: colors.destructive } : { color: colors.success }]}>
-                      {formatCurrency(move.amount)}
+                      {formatCurrency(move.amount, currencySymbol)}
                     </Text>
                   </View>
                   <View style={styles.mobileCardFooter}>
-                    <Text style={styles.mobileCardDate}>{formatDate(move.date)} · Ref: {move.reference}</Text>
+                    <Text style={styles.mobileCardDate}>{formatDate(move.date, dateFormat)} · Ref: {move.reference}</Text>
                     <View style={[styles.statusBadge, move.status === "posted" && { backgroundColor: "#EEF2FF" }]}>
                       <Text style={[styles.statusBadgeText, move.status === "posted" && { color: "#4F46E5" }]}>{move.status}</Text>
                     </View>
