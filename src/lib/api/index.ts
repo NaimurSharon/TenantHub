@@ -159,6 +159,17 @@ export const api = {
       const res = await apiRequest<{ data: any }>(`/customers/${customerId}/hub`);
       const d = res.data ?? {};
       const tabs = d.tabs ?? {};
+
+      // Dynamic sync of currency & date format from backend preference setting
+      const currencySymbol = d.currency_symbol ?? d.header?.currency_symbol ?? d.summary?.currency_symbol ?? d.currency;
+      if (currencySymbol) {
+        useAuthStore.getState().setCurrencySymbol(currencySymbol);
+      }
+      const dateFormat = d.date_format ?? d.header?.date_format;
+      if (dateFormat) {
+        useAuthStore.getState().setDateFormat(dateFormat);
+      }
+
       return {
         header: d.header ?? null,
         summary: d.summary ?? null,
@@ -383,7 +394,55 @@ export const api = {
       const res = await apiRequest<{ data: any }>("/reports/daily-report", {
         query: { date, property_id: propertyId },
       });
-      return res.data ?? null;
+      const d = res.data ?? {};
+
+      // Dynamic sync of currency & date format from daily report backend preference setting
+      const currencySymbol = d.currency_symbol ?? d.summary?.currency_symbol ?? d.currency;
+      if (currencySymbol) {
+        useAuthStore.getState().setCurrencySymbol(currencySymbol);
+      }
+      const dateFormat = d.date_format ?? d.summary?.date_format;
+      if (dateFormat) {
+        useAuthStore.getState().setDateFormat(dateFormat);
+      }
+
+      return d;
+    },
+  },
+
+  settings: {
+    getPreferences: async () => {
+      if (isReviewer()) {
+        return {
+          currency_code: "BDT",
+          currency_symbol: "৳",
+          date_format: "MM/dd/yyyy",
+        };
+      }
+      try {
+        const res = await apiRequest<{ data: any[] }>("/setting/currencies");
+        const list = res.data ?? [];
+        const activeCurr = list.find((c: any) => c.is_default === 1 || c.is_active === 1) ?? list[0];
+        const symbol = activeCurr?.symbol ?? useAuthStore.getState().currencySymbol ?? "$";
+        const code = activeCurr?.code ?? "USD";
+
+        if (symbol) {
+          useAuthStore.getState().setCurrencySymbol(symbol);
+        }
+
+        return {
+          currency_code: code,
+          currency_symbol: symbol,
+          date_format: useAuthStore.getState().dateFormat || "MM/dd/yyyy",
+        };
+      } catch {
+        const currentSymbol = useAuthStore.getState().currencySymbol || "$";
+        return {
+          currency_code: "USD",
+          currency_symbol: currentSymbol,
+          date_format: useAuthStore.getState().dateFormat || "MM/dd/yyyy",
+        };
+      }
     },
   },
 };

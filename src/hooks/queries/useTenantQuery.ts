@@ -2,7 +2,7 @@
  * TanStack Query hooks for the tenant list.
  */
 import { useQuery, useInfiniteQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { api } from "@/lib/api";
 import { useFilterStore } from "@/store/useFilterStore";
@@ -16,7 +16,31 @@ export const tenantKeys = {
   list: (filters: Partial<TenantFilters>) => ["tenants", "list", filters] as const,
   detail: (id: string) => ["tenants", "detail", id] as const,
   units: ["tenants", "units"] as const,
+  preferences: ["system-preferences"] as const,
 };
+
+/** Fetch & sync system preferences (currency, date format) from admin settings. */
+export function useSystemPreferences() {
+  const query = useQuery({
+    queryKey: tenantKeys.preferences,
+    queryFn: () => api.settings.getPreferences(),
+    staleTime: 0,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+  });
+
+  const setCurrencySymbol = useAuthStore((s) => s.setCurrencySymbol);
+  const setDateFormat = useAuthStore((s) => s.setDateFormat);
+
+  useEffect(() => {
+    if (query.data) {
+      if (query.data.currency_symbol) setCurrencySymbol(query.data.currency_symbol);
+      if (query.data.date_format) setDateFormat(query.data.date_format);
+    }
+  }, [query.data, setCurrencySymbol, setDateFormat]);
+
+  return query;
+}
 
 /** Paginated tenant list with infinite scroll. */
 export function useTenants() {

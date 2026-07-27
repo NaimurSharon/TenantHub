@@ -30,6 +30,8 @@ import {
   ExpensesTabContent,
 } from "@/components/reports/DailyReportComponents";
 
+import { formatDate } from "@/lib/api/types";
+
 type ActiveReportTab = "balances" | "collections" | "expenses";
 
 export default function DailyReportsScreen() {
@@ -61,11 +63,7 @@ export default function DailyReportsScreen() {
   }, [selectedDate]);
 
   const displayDateStr = useMemo(() => {
-    return selectedDate.toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    return formatDate(selectedDate);
   }, [selectedDate]);
 
   const adjustDate = (days: number) => {

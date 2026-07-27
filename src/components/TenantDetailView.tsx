@@ -29,7 +29,8 @@ import * as Haptics from "expo-haptics";
 import Toast from "react-native-toast-message";
 import { colors, fonts, radii, shadows } from "@/theme";
 import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/api/types";
+import { useAuthStore } from "@/store/useAuthStore";
+import { formatCurrency, formatDate } from "@/lib/api/types";
 import type { Contact, ContactInput } from "@/lib/api/types";
 
 const TABS = [
@@ -52,6 +53,7 @@ interface TenantDetailViewProps {
 
 export function TenantDetailView({ customerId, isTablet, onBack }: TenantDetailViewProps) {
   const insets = useSafeAreaInsets();
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   const [activeTab, setActiveTab] = useState<TabName>("Invoices");
 
   // Hub data — single request that has everything
@@ -136,18 +138,18 @@ export function TenantDetailView({ customerId, isTablet, onBack }: TenantDetailV
                 styles.balanceValue,
                 (hubData?.header?.current_balance ?? hubData?.summary?.running_balance ?? tenant?.balance ?? 0) < 0 && { color: colors.destructive },
               ]}>
-                {formatCurrency(hubData?.header?.current_balance ?? hubData?.summary?.running_balance ?? tenant?.balance ?? 0)}
+                {formatCurrency(hubData?.header?.current_balance ?? hubData?.summary?.running_balance ?? tenant?.balance ?? 0, currencySymbol)}
               </Text>
             </View>
           </View>
           {hubData?.summary && (
             <View style={styles.summaryStats}>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{formatCurrency(hubData.summary.invoice_total ?? 0)}</Text>
+                <Text style={styles.statValue}>{formatCurrency(hubData.summary.invoice_total ?? 0, currencySymbol)}</Text>
                 <Text style={styles.statLabel}>Invoiced</Text>
               </View>
               <View style={styles.statItem}>
-                <Text style={styles.statValue}>{formatCurrency(hubData.summary.receipt_total ?? 0)}</Text>
+                <Text style={styles.statValue}>{formatCurrency(hubData.summary.receipt_total ?? 0, currencySymbol)}</Text>
                 <Text style={styles.statLabel}>Received</Text>
               </View>
               <View style={styles.statItem}>
@@ -463,6 +465,7 @@ function ContactsTab({
 
 /* ── Generic Data List Tab ─────────────────────────────── */
 function DataListTab({ data, type }: { data: any[]; type: string }) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   if (!data || data.length === 0) {
     return (
       <View style={styles.emptyTab}>
@@ -478,7 +481,7 @@ function DataListTab({ data, type }: { data: any[]; type: string }) {
         const label = item.number ?? item.invoice_no ?? item.receipt_no ?? item.label ?? item.title ?? item.name ?? `#${item.id ?? idx + 1}`;
         const amount = Number(item.total_amount ?? item.amount ?? item.balance_amount ?? 0);
         const date = item.date ?? item.invoice_date ?? item.receipt_date ?? item.sort_date ?? item.created_at;
-        const dateStr = date ? date.split("T")[0] : "";
+        const dateStr = formatDate(date);
         const status = item.status ?? "";
         const invoiceType = item.invoice_type ?? "";
 
@@ -517,7 +520,7 @@ function DataListTab({ data, type }: { data: any[]; type: string }) {
               </View>
               {amount !== 0 ? (
                 <Text style={[styles.dataCardValue, amount < 0 && { color: colors.destructive }]}>
-                  {formatCurrency(Math.abs(amount))}
+                  {formatCurrency(Math.abs(amount), currencySymbol)}
                 </Text>
               ) : fileUrl ? (
                 <View style={styles.viewDocBadge}>

@@ -20,6 +20,7 @@ import { colors, fonts, radii, shadows } from "@/theme";
 import type { Tenant } from "@/lib/api/types";
 import { formatCurrency } from "@/lib/api/types";
 import { useDeleteTenant } from "@/hooks/queries/useTenantQuery";
+import { useAuthStore } from "@/store/useAuthStore";
 import Toast from "react-native-toast-message";
 
 interface TenantCardProps {
@@ -29,6 +30,7 @@ interface TenantCardProps {
 export const TenantCard = React.memo(function TenantCard({ tenant }: TenantCardProps) {
   const router = useRouter();
   const deleteMutation = useDeleteTenant();
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
 
   const showMenu = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -88,7 +90,7 @@ export const TenantCard = React.memo(function TenantCard({ tenant }: TenantCardP
             styles.balance,
             tenant.balance < 0 && { color: colors.destructive },
           ]}>
-            {formatCurrency(tenant.balance)}
+            {formatCurrency(tenant.balance, currencySymbol)}
           </Text>
         </View>
       </View>

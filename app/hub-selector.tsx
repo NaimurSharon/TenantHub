@@ -20,6 +20,7 @@ import * as Haptics from "expo-haptics";
 import { colors, fonts, radii, shadows, spacing } from "@/theme";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useSafeNavigation } from "@/hooks/useSafeNavigation";
+import { useSystemPreferences } from "@/hooks/queries/useTenantQuery";
 import { api } from "@/lib/api";
 
 export default function HubSelectorScreen() {
@@ -28,6 +29,9 @@ export default function HubSelectorScreen() {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const [loggingOut, setLoggingOut] = useState(false);
+
+  // Sync active admin preferences (currency, date format) from backend
+  useSystemPreferences();
   const user = useAuthStore((s) => s.user);
 
   const handleLogout = async () => {

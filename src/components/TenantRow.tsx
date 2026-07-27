@@ -14,6 +14,8 @@ import * as Haptics from "expo-haptics";
 import { useDeleteTenant } from "@/hooks/queries/useTenantQuery";
 import Toast from "react-native-toast-message";
 
+import { useAuthStore } from "@/store/useAuthStore";
+
 interface TenantRowProps {
   tenant: Tenant;
   selected: boolean;
@@ -25,6 +27,7 @@ const BALANCE_WIDTH = 88;
 
 export const TenantRow = React.memo(function TenantRow({ tenant, selected, onPress }: TenantRowProps) {
   const deleteMutation = useDeleteTenant();
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
 
   const handlePress = () => {
     Haptics.selectionAsync();
@@ -80,7 +83,7 @@ export const TenantRow = React.memo(function TenantRow({ tenant, selected, onPre
           { width: BALANCE_WIDTH, textAlign: "right" },
           tenant.balance < 0 && { color: colors.destructive },
         ]}>
-          {formatCurrency(tenant.balance)}
+          {formatCurrency(tenant.balance, currencySymbol)}
         </Text>
       </View>
     </Pressable>

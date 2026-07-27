@@ -34,7 +34,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { colors, fonts, radii, shadows } from "@/theme";
 import { api } from "@/lib/api";
-import { formatCurrency } from "@/lib/api/types";
+import { formatCurrency, formatDate } from "@/lib/api/types";
 import { TabBar, TabItem } from "@/components/shared/TabBar";
 import { ScreenHeader } from "@/components/shared/ScreenHeader";
 import { useSheetAnimation } from "@/hooks/useSheetAnimation";
@@ -319,7 +319,7 @@ export function MovementsTable({
                 const isDebit = move.amount < 0;
                 return (
                   <View key={move.id} style={styles.tableDataRow}>
-                    <Text style={[styles.tdText, { flex: 1.2 }]}>{move.date}</Text>
+                    <Text style={[styles.tdText, { flex: 1.2 }]}>{formatDate(move.date)}</Text>
                     <Text style={[styles.tdText, { flex: 1 }]}>{move.type}</Text>
                     <Text style={[styles.tdText, { flex: 1.5 }]} numberOfLines={1}>{move.reference}</Text>
                     <Text style={[styles.tdText, { flex: 2 }]} numberOfLines={1}>{move.description}</Text>
@@ -352,7 +352,7 @@ export function MovementsTable({
                     </Text>
                   </View>
                   <View style={styles.mobileCardFooter}>
-                    <Text style={styles.mobileCardDate}>{move.date} · Ref: {move.reference}</Text>
+                    <Text style={styles.mobileCardDate}>{formatDate(move.date)} · Ref: {move.reference}</Text>
                     <View style={[styles.statusBadge, move.status === "posted" && { backgroundColor: "#EEF2FF" }]}>
                       <Text style={[styles.statusBadgeText, move.status === "posted" && { color: "#4F46E5" }]}>{move.status}</Text>
                     </View>

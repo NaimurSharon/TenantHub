@@ -127,7 +127,23 @@ export interface PaginatedResponse<T> {
 
 /* ── Utility ─────────────────────────────────────────────────────────────── */
 
-export function formatCurrency(amount: number | null | undefined): string {
+let activeCurrencySymbol = "$";
+
+export function setGlobalCurrencySymbol(symbol: string) {
+  if (symbol && symbol.trim()) {
+    activeCurrencySymbol = symbol.trim();
+  }
+}
+
+export function getGlobalCurrencySymbol(): string {
+  return activeCurrencySymbol;
+}
+
+export function formatCurrency(
+  amount: number | null | undefined,
+  customSymbol?: string
+): string {
+  const symbol = customSymbol || activeCurrencySymbol || "$";
   const val = Number(amount) || 0;
   const isNegative = val < 0;
   const absVal = Math.abs(val);
@@ -135,5 +151,75 @@ export function formatCurrency(amount: number | null | undefined): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
-  return isNegative ? `$ (${formatted})` : `$ ${formatted}`;
+  return isNegative ? `${symbol} (${formatted})` : `${symbol} ${formatted}`;
+}
+
+/* ── Date Formatting Utilities ───────────────────────────────────────────── */
+
+export type DateFormatPattern =
+  | "MM/dd/yyyy"
+  | "dd-MM-yyyy"
+  | "MMM d, yyyy"
+  | "MMMM d, yyyy"
+  | "EEEE, MMM d"
+  | "yyyy-MM-dd";
+
+let activeDateFormat: DateFormatPattern = "MM/dd/yyyy"; // Default to US Format selected in Admin Panel
+
+export function setGlobalDateFormat(pattern: DateFormatPattern | string) {
+  if (pattern && pattern.trim()) {
+    activeDateFormat = pattern.trim() as DateFormatPattern;
+  }
+}
+
+export function getGlobalDateFormat(): DateFormatPattern {
+  return activeDateFormat;
+}
+
+export function formatDate(
+  dateInput: string | Date | null | undefined,
+  pattern?: DateFormatPattern | string
+): string {
+  if (!dateInput) return "";
+
+  let d: Date;
+  if (typeof dateInput === "string") {
+    const cleanStr = dateInput.split("T")[0];
+    const parts = cleanStr.split("-");
+    if (parts.length === 3) {
+      d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    } else {
+      d = new Date(dateInput);
+    }
+  } else {
+    d = dateInput;
+  }
+
+  if (isNaN(d.getTime())) return String(dateInput);
+
+  const fmt = pattern || activeDateFormat;
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+
+  const monthShort = d.toLocaleDateString("en-US", { month: "short" });
+  const monthLong = d.toLocaleDateString("en-US", { month: "long" });
+  const dayNameLong = d.toLocaleDateString("en-US", { weekday: "long" });
+
+  switch (fmt) {
+    case "MM/dd/yyyy":
+      return `${mm}/${dd}/${yyyy}`;
+    case "dd-MM-yyyy":
+      return `${dd}-${mm}-${yyyy}`;
+    case "MMM d, yyyy":
+      return `${monthShort} ${d.getDate()}, ${yyyy}`;
+    case "MMMM d, yyyy":
+      return `${monthLong} ${d.getDate()}, ${yyyy}`;
+    case "EEEE, MMM d":
+      return `${dayNameLong}, ${monthShort} ${d.getDate()}`;
+    case "yyyy-MM-dd":
+      return `${yyyy}-${mm}-${dd}`;
+    default:
+      return `${mm}/${dd}/${yyyy}`;
+  }
 }

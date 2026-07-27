@@ -35,7 +35,7 @@ import { FilterSheet } from "@/components/FilterSheet";
 import { EmptyState } from "@/components/EmptyState";
 import { TenantListSkeleton } from "@/components/TenantListSkeleton";
 import { NetworkBanner } from "@/components/NetworkBanner";
-import { useTenants } from "@/hooks/queries/useTenantQuery";
+import { useTenants, useSystemPreferences } from "@/hooks/queries/useTenantQuery";
 import { useFilterStore } from "@/store/useFilterStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
@@ -47,6 +47,9 @@ export default function TenantsScreen() {
   const navigation = useSafeNavigation();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  // Sync active admin preferences (currency, date format) in real time
+  useSystemPreferences();
 
   // ── State ──────────────────────────────────────────────────
   const [selectedId, setSelectedId] = useState<number | null>(null);
