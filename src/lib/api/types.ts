@@ -144,14 +144,65 @@ export function formatCurrency(
   customSymbol?: string
 ): string {
   const symbol = customSymbol || activeCurrencySymbol || "$";
+  let storeFormat: any = null;
+  try {
+    const { useAuthStore } = require("@/store/useAuthStore");
+    storeFormat = useAuthStore.getState()?.currencyFormat;
+  } catch {
+    storeFormat = null;
+  }
+  const formatOpts = storeFormat || {};
+
+  const decimalPlaces = formatOpts.decimal_places ?? 2;
+  const primaryGroup = formatOpts.primary_group_size ?? 3;
+  const secondaryGroup = formatOpts.secondary_group_size ?? 3;
+  const thousandSep = formatOpts.thousand_separator ?? ",";
+  const decimalSep = formatOpts.decimal_separator ?? ".";
+  const negativeFormat = formatOpts.negative_format ?? "Parentheses";
+
   const val = Number(amount) || 0;
   const isNegative = val < 0;
   const absVal = Math.abs(val);
-  const formatted = absVal.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-  return isNegative ? `${symbol} (${formatted})` : `${symbol} ${formatted}`;
+
+  // 1. Format decimal portion
+  const fixedStr = absVal.toFixed(decimalPlaces);
+  const [intPart, decPart] = fixedStr.split(".");
+
+  // 2. Format integer grouping (primary & secondary group sizes)
+  let formattedInt = "";
+  if (intPart.length <= primaryGroup) {
+    formattedInt = intPart;
+  } else {
+    const primaryChunk = intPart.slice(-primaryGroup);
+    let remaining = intPart.slice(0, -primaryGroup);
+    const chunks = [];
+
+    const secSize = secondaryGroup > 0 ? secondaryGroup : primaryGroup;
+    while (remaining.length > 0) {
+      if (remaining.length <= secSize) {
+        chunks.unshift(remaining);
+        break;
+      }
+      chunks.unshift(remaining.slice(-secSize));
+      remaining = remaining.slice(0, -secSize);
+    }
+
+    formattedInt = chunks.join(thousandSep) + thousandSep + primaryChunk;
+  }
+
+  // 3. Combine integer and decimal parts
+  const numberStr = decPart !== undefined && decimalPlaces > 0
+    ? `${formattedInt}${decimalSep}${decPart}`
+    : formattedInt;
+
+  if (isNegative) {
+    if (negativeFormat === "Parentheses") {
+      return `${symbol} (${numberStr})`;
+    }
+    return `${symbol} -${numberStr}`;
+  }
+
+  return `${symbol} ${numberStr}`;
 }
 
 /* ── Date Formatting Utilities ───────────────────────────────────────────── */

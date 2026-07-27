@@ -7,6 +7,7 @@ import { useShallow } from "zustand/react/shallow";
 import { api } from "@/lib/api";
 import { useFilterStore } from "@/store/useFilterStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { TenantFilters, Tenant } from "@/lib/api/types";
 
 const PAGE_SIZE = 20;
@@ -41,7 +42,7 @@ export function useSystemPreferences() {
   return query;
 }
 
-/** Paginated tenant list with infinite scroll. */
+/** Paginated tenant list with infinite scroll & debounced search. */
 export function useTenants() {
   const { status, search, unit, balanceMin, balanceMax, sortBy, sortOrder } = useFilterStore(
     useShallow((s) => ({
@@ -55,19 +56,22 @@ export function useTenants() {
     }))
   );
 
-  const queryFilters = { status, search: search || undefined, sortBy, sortOrder };
+  // Debounce rapid search keystrokes by 500ms to eliminate over-fetching
+  const debouncedSearch = useDebounce(search, 500);
+
+  const queryFilters = { status, search: debouncedSearch || undefined, sortBy, sortOrder };
 
   const query = useInfiniteQuery({
     queryKey: tenantKeys.list(queryFilters),
-    queryFn: ({ pageParam = 1 }) =>
+    queryFn: ({ pageParam = 1, signal }) =>
       api.tenants.list({
         status,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         sortBy,
         sortOrder,
         perPage: PAGE_SIZE,
         page: pageParam,
-      }),
+      }, { signal }),
     initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.page + 1 : undefined),
     staleTime: 2 * 60_000,

@@ -22,16 +22,27 @@ interface User {
   email: string;
 }
 
+export interface CurrencyFormatOptions {
+  decimal_places?: number;
+  primary_group_size?: number;
+  secondary_group_size?: number;
+  thousand_separator?: string;
+  decimal_separator?: string;
+  negative_format?: string;
+}
+
 interface AuthState {
   token: string | null;
   user: User | null;
   propertyId: number;
   currencySymbol: string;
+  currencyFormat: CurrencyFormatOptions;
   dateFormat: DateFormatPattern;
   isAuthenticated: boolean;
   setAuth: (token: string, user: User) => void;
   setPropertyId: (id: number) => void;
   setCurrencySymbol: (symbol: string) => void;
+  setCurrencyFormat: (options: CurrencyFormatOptions) => void;
   setDateFormat: (pattern: DateFormatPattern | string) => void;
   logout: () => void;
 }
@@ -43,6 +54,14 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       propertyId: 1,
       currencySymbol: "$",
+      currencyFormat: {
+        decimal_places: 2,
+        primary_group_size: 3,
+        secondary_group_size: 3,
+        thousand_separator: ",",
+        decimal_separator: ".",
+        negative_format: "Parentheses",
+      },
       dateFormat: "MM/dd/yyyy",
       isAuthenticated: false,
 
@@ -56,6 +75,12 @@ export const useAuthStore = create<AuthState>()(
       setCurrencySymbol: (symbol) => {
         setGlobalCurrencySymbol(symbol);
         set({ currencySymbol: symbol });
+      },
+
+      setCurrencyFormat: (options) => {
+        set((state) => ({
+          currencyFormat: { ...state.currencyFormat, ...options },
+        }));
       },
 
       setDateFormat: (pattern) => {

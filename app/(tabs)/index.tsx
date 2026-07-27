@@ -56,10 +56,8 @@ export default function TenantsScreen() {
 
   // ── State ──────────────────────────────────────────────────
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [searchVisible, setSearchVisible] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const searchRef = useRef<TextInput>(null);
 
   // ── Data ───────────────────────────────────────────────────
   const { data, isLoading, isRefetching, refetch, error, isError, hasNextPage, fetchNextPage, isFetchingNextPage } = useTenants();
@@ -74,61 +72,11 @@ export default function TenantsScreen() {
   const setSearch = useFilterStore((s) => s.setSearch);
   const hasFilters = useFilterStore((s) => s.hasActiveFilters());
 
-  const currencySymbol = useAuthStore((s) => s.currencySymbol);
-
-  const totalBalance = useMemo(() => {
-    return tenants.reduce((sum, t) => sum + (Number(t.balance) || 0), 0);
-  }, [tenants]);
-
-  // ── Render Portfolio Summary Header ────────────────────────
-  const renderListHeader = useCallback(() => {
-    if (isTablet || tenants.length === 0) return null;
-    return (
-      <View style={styles.portfolioSummaryCard}>
-        <View style={styles.summaryStatItem}>
-          <View style={styles.summaryIconBadge}>
-            <Users size={16} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.summaryStatLabel}>Total Tenants</Text>
-            <Text style={styles.summaryStatValue}>{tenants.length}</Text>
-          </View>
-        </View>
-
-        <View style={styles.summaryDivider} />
-
-        <View style={styles.summaryStatItem}>
-          <View style={[styles.summaryIconBadge, { backgroundColor: colors.surface }]}>
-            <Wallet size={16} color={colors.primary} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.summaryStatLabel}>Portfolio Balance</Text>
-            <Text style={[styles.summaryStatValue, totalBalance < 0 && { color: colors.destructive }]} numberOfLines={1}>
-              {formatCurrency(totalBalance, currencySymbol)}
-            </Text>
-          </View>
-        </View>
-      </View>
-    );
-  }, [isTablet, tenants.length, totalBalance, currencySymbol]);
-
   // Default to first tenant when selection is invalid
   const selectedTenant: Tenant | undefined =
     tenants.find((t) => t.id === selectedId) ?? tenants[0];
 
   // ── Handlers ───────────────────────────────────────────────
-  const toggleSearch = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (searchVisible) {
-      setSearch("");
-      Keyboard.dismiss();
-    }
-    setSearchVisible(!searchVisible);
-    if (!searchVisible) {
-      setTimeout(() => searchRef.current?.focus(), 100);
-    }
-  };
-
   const openFilter = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setFilterVisible(true);
@@ -183,41 +131,34 @@ export default function TenantsScreen() {
       {/* ── Status Toggle ──────────────────────────────────── */}
       <StatusToggle />
 
-      {/* ── Search & Filter Row ────────────────────────────── */}
-      <View style={styles.actionRow}>
-        {searchVisible ? (
-          <View style={styles.searchBar}>
-            <Search size={18} color={colors.mutedForeground} />
-            <TextInput
-              ref={searchRef}
-              style={styles.searchInput}
-              placeholder="Search name, company, unit…"
-              placeholderTextColor={colors.mutedForeground}
-              value={search}
-              onChangeText={setSearch}
-              autoCapitalize="none"
-              autoCorrect={false}
-              returnKeyType="search"
-            />
-            <Pressable onPress={toggleSearch} hitSlop={8}>
-              <X size={18} color={colors.mutedForeground} />
+      {/* ── Search Bar & Filter (Matches Financial Hub) ─────── */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Search size={18} color={colors.mutedForeground} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search name, company, unit…"
+            placeholderTextColor={colors.mutedForeground}
+            value={search}
+            onChangeText={setSearch}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="search"
+          />
+          {search.length > 0 && (
+            <Pressable onPress={() => setSearch("")} hitSlop={8}>
+              <X size={16} color={colors.mutedForeground} />
             </Pressable>
-          </View>
-        ) : (
-          <View style={styles.iconRow}>
-            <View style={{ flex: 1 }} />
-            <Pressable onPress={toggleSearch} hitSlop={12} style={styles.iconBtn}>
-              <Search size={21} color={colors.foregroundSoft} />
-            </Pressable>
-            <Pressable onPress={openFilter} hitSlop={12} style={styles.iconBtn}>
-              <SlidersHorizontal
-                size={21}
-                color={hasFilters ? colors.primary : colors.foregroundSoft}
-              />
-              {hasFilters && <View style={styles.filterDot} />}
-            </Pressable>
-          </View>
-        )}
+          )}
+        </View>
+
+        <Pressable onPress={openFilter} hitSlop={12} style={styles.filterBtn}>
+          <SlidersHorizontal
+            size={20}
+            color={hasFilters ? colors.primary : colors.foregroundSoft}
+          />
+          {hasFilters && <View style={styles.filterDot} />}
+        </Pressable>
       </View>
 
       {/* ── Network Error ───────────────────────────────────── */}
@@ -251,7 +192,7 @@ export default function TenantsScreen() {
               colors={[colors.primary]}
             />
           }
-          ListHeaderComponent={renderListHeader}
+          ListHeaderComponent={null}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={{ paddingVertical: 16, alignItems: "center" }}>
@@ -325,31 +266,15 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     textAlign: "center",
   },
-  actionRow: {
-    paddingHorizontal: 16,
-    marginBottom: 4,
-  },
-  iconRow: {
+  searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end",
-    height: 40,
-  },
-  iconBtn: {
-    padding: 8,
-    marginLeft: 8,
-    position: "relative",
-  },
-  filterDot: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    marginVertical: 10,
+    gap: 10,
   },
   searchBar: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors.surface,
@@ -359,14 +284,35 @@ const styles = StyleSheet.create({
     height: 42,
     paddingHorizontal: 12,
     gap: 8,
-    ...shadows.soft,
+    boxShadow: "0px 2px 8px rgba(0,0,0,0.04)",
   },
   searchInput: {
     flex: 1,
     fontFamily: fonts.regular,
-    fontSize: 15,
+    fontSize: 14,
     color: colors.foreground,
     paddingVertical: 0,
+  },
+  filterBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: radii.lg,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    boxShadow: "0px 2px 8px rgba(0,0,0,0.04)",
+  },
+  filterDot: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.primary,
   },
   addNewBtn: {
     flexDirection: "row",
@@ -404,52 +350,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 14,
     color: colors.mutedForeground,
-  },
-  portfolioSummaryCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    borderRadius: radii.xl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    marginTop: 4,
-    boxShadow: "0px 4px 14px rgba(0,0,0,0.06)",
-  },
-  summaryStatItem: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  summaryIconBadge: {
-    width: 34,
-    height: 34,
-    borderRadius: radii.lg,
-    backgroundColor: colors.primary + "14",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  summaryStatLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors.mutedForeground,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  summaryStatValue: {
-    fontFamily: fonts.bold,
-    fontSize: 15,
-    color: colors.foreground,
-    marginTop: 1,
-  },
-  summaryDivider: {
-    width: 1,
-    height: 28,
-    backgroundColor: colors.border,
-    marginHorizontal: 12,
   },
 });

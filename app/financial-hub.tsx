@@ -6,6 +6,7 @@ import * as Haptics from "expo-haptics";
 import { colors, fonts } from "@/theme";
 import { useBankAccounts, useBankAccountDetail } from "@/hooks/queries/useFinancialQuery";
 import { useSafeNavigation } from "@/hooks/useSafeNavigation";
+import { useDebounce } from "@/hooks/useDebounce";
 import {
   BankSidebar,
   BankSummaryCard,
@@ -31,6 +32,9 @@ export default function FinancialHubScreen() {
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [showCreateSheet, setShowCreateSheet] = useState(false);
 
+  const debouncedSidebarSearch = useDebounce(sidebarSearch, 500);
+  const debouncedTableSearch = useDebounce(tableSearch, 500);
+
   // ── Data Fetching ───────────────────────────────────────────
   const {
     data: bankAccounts = [],
@@ -49,14 +53,14 @@ export default function FinancialHubScreen() {
   // ── Sidebar Filtering ──────────────────────────────────────
   const filteredSidebarAccounts = useMemo(() => {
     return bankAccounts.filter((acc) => {
-      const query = sidebarSearch.toLowerCase();
+      const query = debouncedSidebarSearch.toLowerCase();
       return (
         acc.bank_name.toLowerCase().includes(query) ||
         acc.account_no.toLowerCase().includes(query) ||
         (acc.account_name && acc.account_name.toLowerCase().includes(query))
       );
     });
-  }, [bankAccounts, sidebarSearch]);
+  }, [bankAccounts, debouncedSidebarSearch]);
 
   // ── Table Data Construction ──────────────────────────────────
   const allMovements = useMemo(() => {

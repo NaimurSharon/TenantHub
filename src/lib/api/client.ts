@@ -68,6 +68,8 @@ export async function apiRequest<T>(
   opts: RequestOptions = {},
 ): Promise<T> {
   const authHeaders = getAuthHeaders();
+  const fullUrl = buildUrl(path, opts.query);
+  console.log(`🌐 [API REQUEST] ${opts.method ?? "GET"} ${fullUrl}`);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

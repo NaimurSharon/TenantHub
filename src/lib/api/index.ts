@@ -75,6 +75,7 @@ export const api = {
     /** List tenants/customers with search + pagination. */
     list: async (
       filters: TenantFilters,
+      options?: { signal?: AbortSignal },
     ): Promise<PaginatedResponse<Tenant>> => {
       if (isReviewer()) {
         let results = [...MOCK_REVIEWER_TENANTS];
@@ -128,6 +129,7 @@ export const api = {
         meta?: { total?: number; current_page?: number; per_page?: number; last_page?: number };
       }>("/customers", {
         query: queryParams,
+        signal: options?.signal,
       });
       const tenants = (res.data ?? []).map(customerToTenant);
       const meta = res.meta ?? {};
@@ -428,6 +430,18 @@ export const api = {
 
         if (symbol) {
           useAuthStore.getState().setCurrencySymbol(symbol);
+        }
+
+        if (activeCurr?.format) {
+          const fmt = activeCurr.format;
+          useAuthStore.getState().setCurrencyFormat({
+            decimal_places: Number(fmt.decimal_places ?? 2),
+            primary_group_size: Number(fmt.primary_group_size ?? 3),
+            secondary_group_size: Number(fmt.secondary_group_size ?? 3),
+            thousand_separator: String(fmt.thousand_separator ?? ","),
+            decimal_separator: String(fmt.decimal_separator ?? "."),
+            negative_format: String(fmt.negative_format ?? "Parentheses"),
+          });
         }
 
         return {
