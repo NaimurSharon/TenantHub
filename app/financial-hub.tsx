@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { colors, fonts } from "@/theme";
 import { useBankAccounts, useBankAccountDetail } from "@/hooks/queries/useFinancialQuery";
+import { useSystemPreferences } from "@/hooks/queries/useTenantQuery";
 import { useSafeNavigation } from "@/hooks/useSafeNavigation";
 import { useDebounce } from "@/hooks/useDebounce";
 import {
@@ -20,6 +21,9 @@ export default function FinancialHubScreen() {
   const navigation = useSafeNavigation();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
+
+  // Sync active admin preferences (currency, date format)
+  useSystemPreferences();
 
   // ── States ──────────────────────────────────────────────────
   const [isActive, setIsActive] = useState(true);

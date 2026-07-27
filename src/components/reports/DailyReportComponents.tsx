@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, Calendar } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { colors, fonts, radii, shadows } from "@/theme";
 import { formatCurrency } from "@/lib/api/types";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // ── 1. ReportSummaryCard ──────────────────────────────────────────────────────
 interface ReportSummaryCardProps {
@@ -27,13 +28,14 @@ export function ReportSummaryCard({
   icon,
   accentColor,
 }: ReportSummaryCardProps) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   return (
     <View style={[styles.summaryCard, { borderLeftColor: accentColor }]}>
       <View style={styles.cardHeaderRow}>
         <Text style={styles.cardTitle}>{title}</Text>
         {icon}
       </View>
-      <Text style={styles.cardAmount}>{formatCurrency(amount)}</Text>
+      <Text style={styles.cardAmount}>{formatCurrency(amount, currencySymbol)}</Text>
       <Text style={styles.cardCount}>{countText}</Text>
     </View>
   );
@@ -90,6 +92,7 @@ export function BalancesTabContent({
   balanceTotals,
   isTablet,
 }: BalancesTabContentProps) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   return (
     <View>
       <Text style={styles.blockTitle}>Closing & Opening Balances</Text>
@@ -120,10 +123,10 @@ export function BalancesTabContent({
                   {row.type}
                 </Text>
                 <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right" }]}>
-                  {formatCurrency(row.opening)}
+                  {formatCurrency(row.opening, currencySymbol)}
                 </Text>
                 <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right" }]}>
-                  {formatCurrency(row.closing)}
+                  {formatCurrency(row.closing, currencySymbol)}
                 </Text>
                 <Text
                   style={[
@@ -134,10 +137,10 @@ export function BalancesTabContent({
                   ]}
                 >
                   {change === 0
-                    ? "$ 0"
+                    ? `${currencySymbol} 0`
                     : isPositive
-                      ? `+ ${formatCurrency(change)}`
-                      : formatCurrency(change)}
+                      ? `+ ${formatCurrency(change, currencySymbol)}`
+                      : formatCurrency(change, currencySymbol)}
                 </Text>
               </View>
             );
@@ -150,21 +153,21 @@ export function BalancesTabContent({
               { flex: 1.2, textAlign: "right" },
               balanceTotals.opening < 0 && { color: colors.destructive }
             ]}>
-              {formatCurrency(balanceTotals.opening)}
+              {formatCurrency(balanceTotals.opening, currencySymbol)}
             </Text>
             <Text style={[
               styles.totalsValTxt,
               { flex: 1.2, textAlign: "right" },
               balanceTotals.closing < 0 && { color: colors.destructive }
             ]}>
-              {formatCurrency(balanceTotals.closing)}
+              {formatCurrency(balanceTotals.closing, currencySymbol)}
             </Text>
             <Text style={[
               styles.totalsValTxt,
               { flex: 1.2, textAlign: "right" },
               (balanceTotals.closing - balanceTotals.opening) < 0 && { color: colors.destructive }
             ]}>
-              {formatCurrency(balanceTotals.closing - balanceTotals.opening)}
+              {formatCurrency(balanceTotals.closing - balanceTotals.opening, currencySymbol)}
             </Text>
           </View>
         </View>
@@ -182,10 +185,10 @@ export function BalancesTabContent({
                     <Text style={styles.mobileCardTitle} numberOfLines={1}>
                       {row.type}
                     </Text>
-                    <Text style={styles.mobileCardSub}>Opening: {formatCurrency(row.opening)}</Text>
+                    <Text style={styles.mobileCardSub}>Opening: {formatCurrency(row.opening, currencySymbol)}</Text>
                   </View>
                   <Text style={[styles.mobileCardValue, row.closing < 0 && { color: colors.destructive }]}>
-                    {formatCurrency(row.closing)}
+                    {formatCurrency(row.closing, currencySymbol)}
                   </Text>
                 </View>
                 <View style={styles.mobileCardFooter}>
@@ -209,8 +212,8 @@ export function BalancesTabContent({
                       {change === 0
                         ? "No Change"
                         : isPositive
-                          ? `+ ${formatCurrency(change)}`
-                          : formatCurrency(change)}
+                          ? `+ ${formatCurrency(change, currencySymbol)}`
+                          : formatCurrency(change, currencySymbol)}
                     </Text>
                   </View>
                 </View>
@@ -225,7 +228,7 @@ export function BalancesTabContent({
               <Text style={[
                 styles.mobileTotalValue,
                 balanceTotals.opening < 0 && { color: colors.destructive }
-              ]}>{formatCurrency(balanceTotals.opening)}</Text>
+              ]}>{formatCurrency(balanceTotals.opening, currencySymbol)}</Text>
             </View>
             <View style={styles.mobileTotalRow}>
               <Text style={styles.mobileTotalLabel}>Closing Aggregate:</Text>
@@ -234,7 +237,7 @@ export function BalancesTabContent({
                 { color: colors.primary },
                 balanceTotals.closing < 0 && { color: colors.destructive }
               ]}>
-                {formatCurrency(balanceTotals.closing)}
+                {formatCurrency(balanceTotals.closing, currencySymbol)}
               </Text>
             </View>
           </View>
@@ -254,6 +257,7 @@ export function CollectionsTabContent({
   receiptRows,
   isTablet,
 }: CollectionsTabContentProps) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   const totalCollections = useMemo(() => {
     return receiptRows.reduce((sum, r) => sum + Number(r.amount ?? 0), 0);
   }, [receiptRows]);
@@ -293,7 +297,7 @@ export function CollectionsTabContent({
                 {row.method || "Cash"}
               </Text>
               <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", color: "#10B981" }]}>
-                {formatCurrency(row.amount)}
+                {formatCurrency(row.amount, currencySymbol)}
               </Text>
             </View>
           ))}
@@ -301,7 +305,7 @@ export function CollectionsTabContent({
           <View style={styles.tableTotalsRow}>
             <Text style={[styles.totalsLabelTxt, { flex: 4.9 }]}>Total Collections</Text>
             <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right", color: "#10B981" }]}>
-              {formatCurrency(totalCollections)}
+              {formatCurrency(totalCollections, currencySymbol)}
             </Text>
           </View>
         </View>
@@ -323,7 +327,7 @@ export function CollectionsTabContent({
                   </Text>
                 </View>
                 <Text style={[styles.breakdownValue, { color: "#10B981" }]}>
-                  {formatCurrency(row.amount)}
+                  {formatCurrency(row.amount, currencySymbol)}
                 </Text>
               </View>
             ))}
@@ -331,7 +335,7 @@ export function CollectionsTabContent({
             <View style={[styles.breakdownRow, styles.breakdownTotal]}>
               <Text style={styles.breakdownLabelTotal}>Total Collection</Text>
               <Text style={[styles.breakdownValueTotal, { color: "#10B981" }]}>
-                {formatCurrency(totalCollections)}
+                {formatCurrency(totalCollections, currencySymbol)}
               </Text>
             </View>
           </View>
@@ -348,6 +352,7 @@ interface ExpensesTabContentProps {
 }
 
 export function ExpensesTabContent({ expenseRows, isTablet }: ExpensesTabContentProps) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   const totalExpenses = useMemo(() => {
     return expenseRows.reduce((sum, r) => sum + Number(r.amount ?? 0), 0);
   }, [expenseRows]);
@@ -387,7 +392,7 @@ export function ExpensesTabContent({ expenseRows, isTablet }: ExpensesTabContent
                 {row.status || "Posted"}
               </Text>
               <Text style={[styles.tdTxt, { flex: 1.2, textAlign: "right", color: colors.destructive }]}>
-                {formatCurrency(row.amount)}
+                {formatCurrency(row.amount, currencySymbol)}
               </Text>
             </View>
           ))}
@@ -395,7 +400,7 @@ export function ExpensesTabContent({ expenseRows, isTablet }: ExpensesTabContent
           <View style={styles.tableTotalsRow}>
             <Text style={[styles.totalsLabelTxt, { flex: 4.7 }]}>Total Expenses</Text>
             <Text style={[styles.totalsValTxt, { flex: 1.2, textAlign: "right", color: colors.destructive }]}>
-              {formatCurrency(totalExpenses)}
+              {formatCurrency(totalExpenses, currencySymbol)}
             </Text>
           </View>
         </View>
@@ -419,7 +424,7 @@ export function ExpensesTabContent({ expenseRows, isTablet }: ExpensesTabContent
                   </Text>
                 </View>
                 <Text style={[styles.breakdownValue, { color: colors.destructive }]}>
-                  {formatCurrency(row.amount)}
+                  {formatCurrency(row.amount, currencySymbol)}
                 </Text>
               </View>
             ))}
@@ -427,7 +432,7 @@ export function ExpensesTabContent({ expenseRows, isTablet }: ExpensesTabContent
             <View style={[styles.breakdownRow, styles.breakdownTotal]}>
               <Text style={styles.breakdownLabelTotal}>Total Expenses</Text>
               <Text style={[styles.breakdownValueTotal, { color: colors.destructive }]}>
-                {formatCurrency(totalExpenses)}
+                {formatCurrency(totalExpenses, currencySymbol)}
               </Text>
             </View>
           </View>

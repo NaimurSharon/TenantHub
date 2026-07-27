@@ -50,6 +50,7 @@ interface BankAccountCardProps {
 }
 
 export function BankAccountCard({ account: acc, isSelected, onPress }: BankAccountCardProps) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   return (
     <Pressable
       onPress={onPress}
@@ -73,7 +74,7 @@ export function BankAccountCard({ account: acc, isSelected, onPress }: BankAccou
           { width: BALANCE_WIDTH, textAlign: "right" },
           acc.current_balance < 0 && { color: colors.destructive }
         ]}>
-          {formatCurrency(acc.current_balance)}
+          {formatCurrency(acc.current_balance, currencySymbol)}
         </Text>
       </View>
     </Pressable>
@@ -190,6 +191,7 @@ interface BankSummaryCardProps {
 }
 
 export function BankSummaryCard({ bank, onMobileBack, isTablet }: BankSummaryCardProps) {
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
   return (
     <>
       {!isTablet && (
@@ -219,7 +221,7 @@ export function BankSummaryCard({ bank, onMobileBack, isTablet }: BankSummaryCar
           <View style={styles.summaryRight}>
             <Text style={styles.balanceLabel}>Balance</Text>
             <Text style={[styles.balanceValue, bank.current_balance < 0 && { color: colors.destructive }]}>
-              {formatCurrency(bank.current_balance)}
+              {formatCurrency(bank.current_balance, currencySymbol)}
             </Text>
           </View>
         </View>

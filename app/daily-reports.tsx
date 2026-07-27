@@ -31,6 +31,7 @@ import {
 } from "@/components/reports/DailyReportComponents";
 
 import { formatDate } from "@/lib/api/types";
+import { useSystemPreferences } from "@/hooks/queries/useTenantQuery";
 
 type ActiveReportTab = "balances" | "collections" | "expenses";
 
@@ -38,6 +39,9 @@ export default function DailyReportsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useSafeNavigation();
   const { width } = useWindowDimensions();
+
+  // Sync active admin preferences (currency, date format)
+  useSystemPreferences();
   const isTablet = width >= 768;
 
   // Read propertyId from auth store — never hard-code
