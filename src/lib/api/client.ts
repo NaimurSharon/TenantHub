@@ -7,7 +7,7 @@
 
 const getBaseUrl = (): string => {
   const envUrl = process.env.EXPO_PUBLIC_API_BASE;
-  const url = envUrl || "https://backendbms.siscotech.com/api";
+  const url = envUrl || "https://devbackendbms.siscotech.com/api";
   return url.replace(/\/+$/, "");
 };
 
@@ -63,6 +63,38 @@ function getAuthHeaders(): Record<string, string> {
   }
 }
 
+function extractErrorMessage(data: any, fallback: string): string {
+  if (!data) return fallback;
+
+  // 1. Check nested validation errors: data.error.errors or data.errors
+  const validationObj = data.error?.errors || data.errors;
+  if (validationObj && typeof validationObj === "object") {
+    const keys = Object.keys(validationObj);
+    if (keys.length > 0) {
+      const firstVal = validationObj[keys[0]];
+      if (Array.isArray(firstVal) && firstVal.length > 0 && typeof firstVal[0] === "string") {
+        return firstVal[0];
+      }
+      if (typeof firstVal === "string") {
+        return firstVal;
+      }
+    }
+  }
+
+  // 2. Check string message or string error
+  if (typeof data.message === "string" && data.message.trim() && data.message !== "Validation failed.") {
+    return data.message;
+  }
+  if (typeof data.error === "string" && data.error.trim()) {
+    return data.error;
+  }
+  if (typeof data.message === "string" && data.message.trim()) {
+    return data.message;
+  }
+
+  return fallback;
+}
+
 export async function apiRequest<T>(
   path: string,
   opts: RequestOptions = {},
@@ -116,13 +148,10 @@ export async function apiRequest<T>(
       try {
         const { useAuthStore } = require("@/store/useAuthStore");
         useAuthStore.getState().logout();
-      } catch {}
+      } catch { }
     }
-    throw new ApiError(
-      res.status,
-      data?.error ?? data?.message ?? res.statusText,
-      data,
-    );
+    const errorMsg = extractErrorMessage(data, res.statusText || `Request failed (${res.status})`);
+    throw new ApiError(res.status, errorMsg, data);
   }
 
   return data as T;

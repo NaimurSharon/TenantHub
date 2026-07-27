@@ -523,6 +523,7 @@ export function CreateBankAccountSheet({
   const { modalVisible, backdrop, card, close } = useSheetAnimation(visible, onClose);
 
   const [bankName, setBankName] = useState("");
+  const [branchName, setBranchName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [initialBalance, setInitialBalance] = useState("");
@@ -530,17 +531,20 @@ export function CreateBankAccountSheet({
   const createMutation = useMutation({
     mutationFn: (input: any) => api.financial.createAccount(input),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["bank-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["financial"] });
       Toast.show({ type: "success", text1: "Bank Account Created" });
       resetForm();
       close();
     },
-    onError: (e: any) =>
-      Toast.show({ type: "error", text1: e.message || "Failed to create bank account" }),
+    onError: (e: any) => {
+      const msg = typeof e?.message === "string" ? e.message : "Failed to create bank account";
+      Toast.show({ type: "error", text1: msg });
+    },
   });
 
   const resetForm = () => {
     setBankName("");
+    setBranchName("");
     setAccountName("");
     setAccountNo("");
     setInitialBalance("");
@@ -553,9 +557,11 @@ export function CreateBankAccountSheet({
     }
     createMutation.mutate({
       bank_name: bankName.trim(),
+      branch_name: branchName.trim() || "Main Branch",
       account_name: accountName.trim() || bankName.trim(),
       account_no: accountNo.trim(),
       current_balance: initialBalance ? parseFloat(initialBalance) : 0,
+      opening_balance: initialBalance ? parseFloat(initialBalance) : 0,
     });
   };
 
@@ -618,6 +624,12 @@ export function CreateBankAccountSheet({
                 placeholder="e.g. Emirates NBD"
                 value={bankName}
                 onChangeText={setBankName}
+              />
+              <Input
+                label="Branch Name"
+                placeholder="e.g. Main Branch"
+                value={branchName}
+                onChangeText={setBranchName}
               />
               <Input
                 label="Account Name"

@@ -366,8 +366,10 @@ export const api = {
     },
     createAccount: async (input: {
       bank_name: string;
+      branch_name?: string;
       account_name?: string;
       account_no: string;
+      opening_balance?: number;
       current_balance?: number;
     }) => {
       if (isReviewer()) {
@@ -380,9 +382,14 @@ export const api = {
         MOCK_BANK_ACCOUNTS.push(newAcc);
         return newAcc;
       }
+      const payload = {
+        ...input,
+        branch_name: input.branch_name || "Main Branch",
+        opening_balance: input.opening_balance ?? input.current_balance ?? 0,
+      };
       const res = await apiRequest<{ data: any }>("/setting/bank-accounts", {
         method: "POST",
-        body: input,
+        body: payload,
       });
       return res.data;
     },
