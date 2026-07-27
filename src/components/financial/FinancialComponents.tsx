@@ -526,7 +526,6 @@ export function CreateBankAccountSheet({
   const [branchName, setBranchName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [accountNo, setAccountNo] = useState("");
-  const [initialBalance, setInitialBalance] = useState("");
 
   const createMutation = useMutation({
     mutationFn: (input: any) => api.financial.createAccount(input),
@@ -547,7 +546,6 @@ export function CreateBankAccountSheet({
     setBranchName("");
     setAccountName("");
     setAccountNo("");
-    setInitialBalance("");
   };
 
   const handleSubmit = () => {
@@ -560,8 +558,6 @@ export function CreateBankAccountSheet({
       branch_name: branchName.trim() || "Main Branch",
       account_name: accountName.trim() || bankName.trim(),
       account_no: accountNo.trim(),
-      current_balance: initialBalance ? parseFloat(initialBalance) : 0,
-      opening_balance: initialBalance ? parseFloat(initialBalance) : 0,
     });
   };
 
@@ -642,13 +638,6 @@ export function CreateBankAccountSheet({
                 placeholder="e.g. XXXXX1234"
                 value={accountNo}
                 onChangeText={setAccountNo}
-              />
-              <Input
-                label="Initial Balance"
-                placeholder="e.g. 0.00"
-                value={initialBalance}
-                onChangeText={setInitialBalance}
-                keyboardType="decimal-pad"
               />
             </ScrollView>
 
