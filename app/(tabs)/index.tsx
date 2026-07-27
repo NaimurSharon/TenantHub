@@ -10,7 +10,7 @@
  *   • Scrollable tenant rows
  *   • "Add New" action at bottom
  */
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useMemo } from "react";
 import {
   View,
   FlatList,
@@ -24,7 +24,7 @@ import {
 } from "react-native";
 import { Text } from "@/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Search, SlidersHorizontal, X, Plus, ArrowLeft } from "lucide-react-native";
+import { Search, SlidersHorizontal, X, Plus, ArrowLeft, Users, Wallet } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeNavigation } from "@/hooks/useSafeNavigation";
 import { colors, fonts, radii, shadows, spacing } from "@/theme";
@@ -35,20 +35,23 @@ import { FilterSheet } from "@/components/FilterSheet";
 import { EmptyState } from "@/components/EmptyState";
 import { TenantListSkeleton } from "@/components/TenantListSkeleton";
 import { NetworkBanner } from "@/components/NetworkBanner";
-import { useTenants, useSystemPreferences } from "@/hooks/queries/useTenantQuery";
+import { useTenants, useSystemPreferences, tenantKeys } from "@/hooks/queries/useTenantQuery";
+import { useQueryClient } from "@tanstack/react-query";
 import { useFilterStore } from "@/store/useFilterStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
 import type { Tenant } from "@/lib/api/types";
+import { formatCurrency } from "@/lib/api/types";
 import { TenantDetailView } from "@/components/TenantDetailView";
 
 export default function TenantsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useSafeNavigation();
+  const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
-  // Sync active admin preferences (currency, date format) in real time
+  // Sync active admin preferences (currency, date format)
   useSystemPreferences();
 
   // ── State ──────────────────────────────────────────────────
@@ -62,9 +65,52 @@ export default function TenantsScreen() {
   const { data, isLoading, isRefetching, refetch, error, isError, hasNextPage, fetchNextPage, isFetchingNextPage } = useTenants();
   const tenants = data?.data ?? [];
 
+  const handleRefresh = useCallback(() => {
+    refetch();
+    queryClient.invalidateQueries({ queryKey: tenantKeys.preferences });
+  }, [refetch, queryClient]);
+
   const search = useFilterStore((s) => s.search);
   const setSearch = useFilterStore((s) => s.setSearch);
   const hasFilters = useFilterStore((s) => s.hasActiveFilters());
+
+  const currencySymbol = useAuthStore((s) => s.currencySymbol);
+
+  const totalBalance = useMemo(() => {
+    return tenants.reduce((sum, t) => sum + (Number(t.balance) || 0), 0);
+  }, [tenants]);
+
+  // ── Render Portfolio Summary Header ────────────────────────
+  const renderListHeader = useCallback(() => {
+    if (isTablet || tenants.length === 0) return null;
+    return (
+      <View style={styles.portfolioSummaryCard}>
+        <View style={styles.summaryStatItem}>
+          <View style={styles.summaryIconBadge}>
+            <Users size={16} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.summaryStatLabel}>Total Tenants</Text>
+            <Text style={styles.summaryStatValue}>{tenants.length}</Text>
+          </View>
+        </View>
+
+        <View style={styles.summaryDivider} />
+
+        <View style={styles.summaryStatItem}>
+          <View style={[styles.summaryIconBadge, { backgroundColor: colors.surface }]}>
+            <Wallet size={16} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.summaryStatLabel}>Portfolio Balance</Text>
+            <Text style={[styles.summaryStatValue, totalBalance < 0 && { color: colors.destructive }]} numberOfLines={1}>
+              {formatCurrency(totalBalance, currencySymbol)}
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  }, [isTablet, tenants.length, totalBalance, currencySymbol]);
 
   // Default to first tenant when selection is invalid
   const selectedTenant: Tenant | undefined =
@@ -200,14 +246,12 @@ export default function TenantsScreen() {
           refreshControl={
             <RefreshControl
               refreshing={isRefetching}
-              onRefresh={refetch}
+              onRefresh={handleRefresh}
               tintColor={colors.primary}
               colors={[colors.primary]}
             />
           }
-          ListHeaderComponent={
-            (!isTablet && selectedTenant) ? <TenantCard tenant={selectedTenant} /> : null
-          }
+          ListHeaderComponent={renderListHeader}
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={{ paddingVertical: 16, alignItems: "center" }}>
@@ -360,5 +404,52 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 14,
     color: colors.mutedForeground,
+  },
+  portfolioSummaryCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radii.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    marginTop: 4,
+    boxShadow: "0px 4px 14px rgba(0,0,0,0.06)",
+  },
+  summaryStatItem: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  summaryIconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: radii.lg,
+    backgroundColor: colors.primary + "14",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  summaryStatLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    color: colors.mutedForeground,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  summaryStatValue: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.foreground,
+    marginTop: 1,
+  },
+  summaryDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: colors.border,
+    marginHorizontal: 12,
   },
 });

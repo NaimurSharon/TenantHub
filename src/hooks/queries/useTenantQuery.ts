@@ -24,9 +24,8 @@ export function useSystemPreferences() {
   const query = useQuery({
     queryKey: tenantKeys.preferences,
     queryFn: () => api.settings.getPreferences(),
-    staleTime: 0,
+    staleTime: 5 * 60_000, // 5 min TTL for optimal mobile performance
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
   });
 
   const setCurrencySymbol = useAuthStore((s) => s.setCurrencySymbol);
