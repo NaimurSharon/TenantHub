@@ -97,7 +97,7 @@ export default function HubSelectorScreen() {
               <Building size={24} color={colors.primary} />
             </View>
             <View style={styles.cardDetails}>
-              <Text style={styles.cardTitle}>Tenants</Text>
+              <Text style={styles.cardTitle}>Tenants Hub</Text>
               <Text style={styles.cardDesc}>
                 Manage tenants, active leases, units, and billing documents
               </Text>
