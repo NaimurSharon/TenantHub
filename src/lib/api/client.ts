@@ -7,7 +7,7 @@
 
 const getBaseUrl = (): string => {
   const envUrl = process.env.EXPO_PUBLIC_API_BASE;
-  const url = envUrl || "https://devbackendbms.siscotech.com/api";
+  const url = envUrl || "https://backendbms.siscotech.com/api";
   return url.replace(/\/+$/, "");
 };
 

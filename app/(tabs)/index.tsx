@@ -54,6 +54,8 @@ export default function TenantsScreen() {
   // Sync active admin preferences (currency, date format)
   useSystemPreferences();
 
+  const propertyCode = useAuthStore((s) => s.propertyCode);
+
   // ── State ──────────────────────────────────────────────────
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [filterVisible, setFilterVisible] = useState(false);
@@ -122,7 +124,14 @@ export default function TenantsScreen() {
         <Pressable onPress={handleBackToSelector} hitSlop={12} style={styles.logoutBtn}>
           <ArrowLeft size={20} color={colors.mutedForeground} />
         </Pressable>
-        <Text style={styles.headerTitle}>TENANT HUB</Text>
+        <View style={styles.headerTitleContainer}>
+          <Text style={styles.headerTitle}>TENANT HUB</Text>
+          {propertyCode ? (
+            <View style={styles.headerPropBadge}>
+              <Text style={styles.headerPropBadgeText}>{propertyCode}</Text>
+            </View>
+          ) : null}
+        </View>
         <Pressable onPress={handleAddNew} hitSlop={12} style={styles.addNewHeaderBtn}>
           <Plus size={20} color={colors.primary} strokeWidth={2.5} />
         </Pressable>
@@ -258,13 +267,31 @@ const styles = StyleSheet.create({
   addNewHeaderBtn: {
     padding: 4,
   },
-  headerTitle: {
+  headerTitleContainer: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  headerTitle: {
     fontFamily: fonts.bold,
-    fontSize: 20,
+    fontSize: 18,
     color: colors.foreground,
-    letterSpacing: 1.5,
-    textAlign: "center",
+    letterSpacing: 1.2,
+  },
+  headerPropBadge: {
+    backgroundColor: colors.surface,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  headerPropBadgeText: {
+    fontFamily: fonts.bold,
+    fontSize: 11,
+    color: colors.primary,
   },
   searchContainer: {
     flexDirection: "row",

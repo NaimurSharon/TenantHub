@@ -14,6 +14,7 @@ import {
   setGlobalCurrencySymbol,
   setGlobalDateFormat,
   DateFormatPattern,
+  PropertyItem,
 } from "@/lib/api/types";
 
 interface User {
@@ -35,12 +36,17 @@ interface AuthState {
   token: string | null;
   user: User | null;
   propertyId: number;
+  propertyName: string;
+  propertyCode: string;
+  assignedProperties: PropertyItem[];
   currencySymbol: string;
   currencyFormat: CurrencyFormatOptions;
   dateFormat: DateFormatPattern;
   isAuthenticated: boolean;
   setAuth: (token: string, user: User) => void;
   setPropertyId: (id: number) => void;
+  setPropertyContext: (property: { id: number; name: string; code: string }) => void;
+  setAssignedProperties: (properties: PropertyItem[]) => void;
   setCurrencySymbol: (symbol: string) => void;
   setCurrencyFormat: (options: CurrencyFormatOptions) => void;
   setDateFormat: (pattern: DateFormatPattern | string) => void;
@@ -53,6 +59,9 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       propertyId: 1,
+      propertyName: "Kader Tower Building Complex",
+      propertyCode: "KT-001",
+      assignedProperties: [],
       currencySymbol: "$",
       currencyFormat: {
         decimal_places: 2,
@@ -70,7 +79,19 @@ export const useAuthStore = create<AuthState>()(
         set({ token, user, isAuthenticated: true });
       },
 
-      setPropertyId: (propertyId) => set({ propertyId }),
+      setPropertyId: (propertyId) => {
+        set({ propertyId });
+      },
+
+      setPropertyContext: (prop) => {
+        set({
+          propertyId: prop.id,
+          propertyName: prop.name,
+          propertyCode: prop.code,
+        });
+      },
+
+      setAssignedProperties: (assignedProperties) => set({ assignedProperties }),
 
       setCurrencySymbol: (symbol) => {
         setGlobalCurrencySymbol(symbol);
@@ -90,7 +111,25 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         clearAndResetQueryCache();
-        set({ token: null, user: null, isAuthenticated: false });
+        set({
+          token: null,
+          user: null,
+          isAuthenticated: false,
+          propertyId: 1,
+          propertyName: "Kader Tower Building Complex",
+          propertyCode: "KT-001",
+          assignedProperties: [],
+          currencySymbol: "$",
+          currencyFormat: {
+            decimal_places: 2,
+            primary_group_size: 3,
+            secondary_group_size: 3,
+            thousand_separator: ",",
+            decimal_separator: ".",
+            negative_format: "Parentheses",
+          },
+          dateFormat: "MM/dd/yyyy",
+        });
       },
     }),
     {
@@ -108,7 +147,11 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         user: state.user,
         propertyId: state.propertyId,
+        propertyName: state.propertyName,
+        propertyCode: state.propertyCode,
+        assignedProperties: state.assignedProperties,
         currencySymbol: state.currencySymbol,
+        currencyFormat: state.currencyFormat,
         dateFormat: state.dateFormat,
         isAuthenticated: state.isAuthenticated,
       }),

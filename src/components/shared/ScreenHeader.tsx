@@ -10,6 +10,9 @@ import * as Haptics from "expo-haptics";
 import { colors, fonts } from "@/theme";
 import { useRouter } from "expo-router";
 
+import { useAuthStore } from "@/store/useAuthStore";
+import { radii } from "@/theme";
+
 interface ScreenHeaderProps {
   title: string;
   /** Defaults to navigating back to /hub-selector */
@@ -20,6 +23,7 @@ interface ScreenHeaderProps {
 
 export function ScreenHeader({ title, onBack, rightAction }: ScreenHeaderProps) {
   const router = useRouter();
+  const propertyCode = useAuthStore((s) => s.propertyCode);
 
   const handleBack = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -32,7 +36,14 @@ export function ScreenHeader({ title, onBack, rightAction }: ScreenHeaderProps) 
       <Pressable onPress={handleBack} hitSlop={12} style={styles.backBtn}>
         <ArrowLeft size={20} color={colors.mutedForeground} />
       </Pressable>
-      <Text style={styles.headerTitle}>{title}</Text>
+      <View style={styles.titleContainer}>
+        <Text style={styles.headerTitle}>{title}</Text>
+        {propertyCode ? (
+          <View style={styles.propCodeBadge}>
+            <Text style={styles.propCodeText}>{propertyCode}</Text>
+          </View>
+        ) : null}
+      </View>
       <View style={styles.rightSlot}>{rightAction ?? <View style={{ width: 28 }} />}</View>
     </View>
   );
@@ -52,13 +63,31 @@ const styles = StyleSheet.create({
     padding: 4,
     width: 28,
   },
-  headerTitle: {
+  titleContainer: {
     flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  headerTitle: {
     fontFamily: fonts.bold,
-    fontSize: 20,
+    fontSize: 18,
     color: colors.foreground,
-    letterSpacing: 1.5,
-    textAlign: "center",
+    letterSpacing: 1.2,
+  },
+  propCodeBadge: {
+    backgroundColor: colors.background,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radii.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  propCodeText: {
+    fontFamily: fonts.bold,
+    fontSize: 11,
+    color: colors.primary,
   },
   rightSlot: {
     width: 28,

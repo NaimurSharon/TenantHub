@@ -23,16 +23,26 @@ import { useSafeNavigation } from "@/hooks/useSafeNavigation";
 import { useSystemPreferences } from "@/hooks/queries/useTenantQuery";
 import { api } from "@/lib/api";
 
+import { usePropertyContext } from "@/hooks/queries/usePropertyQuery";
+import { PropertySelectorSheet } from "@/components/shared/PropertySelectorSheet";
+import { Building2, ChevronDown } from "lucide-react-native";
+
 export default function HubSelectorScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useSafeNavigation();
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
   const [loggingOut, setLoggingOut] = useState(false);
+  const [propertySheetVisible, setPropertySheetVisible] = useState(false);
 
   // Sync active admin preferences (currency, date format) from backend
   useSystemPreferences();
+  // Sync assigned properties & current property context from backend
+  usePropertyContext();
+
   const user = useAuthStore((s) => s.user);
+  const propertyName = useAuthStore((s) => s.propertyName);
+  const propertyCode = useAuthStore((s) => s.propertyCode);
 
   const handleLogout = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -53,7 +63,7 @@ export default function HubSelectorScreen() {
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>PM System</Text>
+        <Text style={styles.headerTitle}>PM SYSTEM</Text>
         <Pressable
           onPress={handleLogout}
           disabled={loggingOut}
@@ -80,6 +90,32 @@ export default function HubSelectorScreen() {
             Select a hub to manage PM System properties
           </Text>
         </View>
+
+        {/* Active Property Card (Multi-Property Context Switcher) */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.activePropertyBanner,
+            pressed && styles.activePropertyBannerPressed,
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            setPropertySheetVisible(true);
+          }}
+        >
+          <View style={styles.propertyIconBadge}>
+            <Building2 size={22} color={colors.primary} />
+          </View>
+          <View style={{ flex: 1, marginHorizontal: 12 }}>
+            <Text style={styles.activePropLabel}>CURRENT PROPERTY</Text>
+            <Text style={styles.activePropName} numberOfLines={1}>
+              {propertyName || "Kader Tower Building Complex"}
+            </Text>
+          </View>
+          <View style={styles.propCodeBadge}>
+            <Text style={styles.propCodeText}>{propertyCode || "KT-001"}</Text>
+          </View>
+          <ChevronDown size={18} color={colors.mutedForeground} style={{ marginLeft: 6 }} />
+        </Pressable>
 
         {/* Hub Cards */}
         <View style={[styles.cardsContainer, isTablet && styles.cardsContainerTablet]}>
@@ -152,6 +188,12 @@ export default function HubSelectorScreen() {
 
         <Text style={styles.footer}>Powered by SiscoTek</Text>
       </ScrollView>
+
+      {/* Property Selector Bottom Sheet */}
+      <PropertySelectorSheet
+        visible={propertySheetVisible}
+        onClose={() => setPropertySheetVisible(false)}
+      />
     </View>
   );
 }
@@ -160,6 +202,55 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  activePropertyBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.surface,
+    borderRadius: radii.xl,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: colors.primary + "30",
+    ...shadows.soft,
+  },
+  activePropertyBannerPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.995 }],
+  },
+  propertyIconBadge: {
+    width: 42,
+    height: 42,
+    borderRadius: radii.lg,
+    backgroundColor: colors.primary + "14",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activePropLabel: {
+    fontFamily: fonts.semiBold,
+    fontSize: 10,
+    color: colors.mutedForeground,
+    letterSpacing: 0.5,
+  },
+  activePropName: {
+    fontFamily: fonts.bold,
+    fontSize: 15,
+    color: colors.foreground,
+    marginTop: 1,
+  },
+  propCodeBadge: {
+    backgroundColor: colors.background,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: radii.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  propCodeText: {
+    fontFamily: fonts.bold,
+    fontSize: 12,
+    color: colors.primary,
   },
   header: {
     flexDirection: "row",

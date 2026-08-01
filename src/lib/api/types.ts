@@ -92,6 +92,22 @@ export interface HubData {
   units?: any[];
 }
 
+export interface PropertyItem {
+  id: number;
+  property_code: string;
+  name: string;
+  display_name: string;
+  property_type: string;
+  is_active: boolean;
+}
+
+export interface PropertyContextResponse {
+  selected_property: PropertyItem | null;
+  assigned_properties: PropertyItem[];
+  assigned_property_count: number;
+  selection_required: boolean;
+}
+
 export interface TenantFilters {
   status: TenantStatus;
   search?: string;

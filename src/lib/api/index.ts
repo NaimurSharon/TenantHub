@@ -13,6 +13,8 @@ import type {
   Contact,
   ContactInput,
   HubData,
+  PropertyItem,
+  PropertyContextResponse,
 } from "./types";
 import { customerToTenant } from "./types";
 import {
@@ -331,13 +333,64 @@ export const api = {
   },
 
   properties: {
-    list: async () => {
+    getContext: async (): Promise<PropertyContextResponse> => {
       if (isReviewer()) {
-        return [{ id: 1, name: "PM System" }];
+        const mockProps: PropertyItem[] = [
+          { id: 1, property_code: "KT-001", name: "Kader Tower Building Complex", display_name: "Kader Tower Building Complex", property_type: "commercial", is_active: true },
+          { id: 5, property_code: "KC-001", name: "Kowshick Property", display_name: "Kowshick Property", property_type: "commercial", is_active: true },
+          { id: 4, property_code: "0225", name: "Abrar Property", display_name: "Abrar Property", property_type: "commercial", is_active: true },
+        ];
+        return {
+          selected_property: mockProps[0],
+          assigned_properties: mockProps,
+          assigned_property_count: mockProps.length,
+          selection_required: false,
+        };
       }
-      const res = await apiRequest<{ data: any[] }>("/properties");
+      const res = await apiRequest<{ data: PropertyContextResponse }>("/me/property-context");
+      return res.data;
+    },
+
+    selectContext: async (propertyId: number): Promise<PropertyContextResponse> => {
+      if (isReviewer()) {
+        const mockProps: PropertyItem[] = [
+          { id: 1, property_code: "KT-001", name: "Kader Tower Building Complex", display_name: "Kader Tower Building Complex", property_type: "commercial", is_active: true },
+          { id: 5, property_code: "KC-001", name: "Kowshick Property", display_name: "Kowshick Property", property_type: "commercial", is_active: true },
+          { id: 4, property_code: "0225", name: "Abrar Property", display_name: "Abrar Property", property_type: "commercial", is_active: true },
+        ];
+        const selected = mockProps.find(p => p.id === propertyId) ?? mockProps[0];
+        return {
+          selected_property: selected,
+          assigned_properties: mockProps,
+          assigned_property_count: mockProps.length,
+          selection_required: false,
+        };
+      }
+      const res = await apiRequest<{ data: PropertyContextResponse }>("/me/property-context", {
+        method: "POST",
+        body: { property_id: propertyId },
+      });
+      return res.data;
+    },
+
+    list: async (params?: { is_active?: number; per_page?: number; page?: number }): Promise<PropertyItem[]> => {
+      if (isReviewer()) {
+        return [
+          { id: 1, property_code: "KT-001", name: "Kader Tower Building Complex", display_name: "Kader Tower Building Complex", property_type: "commercial", is_active: true },
+          { id: 5, property_code: "KC-001", name: "Kowshick Property", display_name: "Kowshick Property", property_type: "commercial", is_active: true },
+          { id: 4, property_code: "0225", name: "Abrar Property", display_name: "Abrar Property", property_type: "commercial", is_active: true },
+        ];
+      }
+      const res = await apiRequest<{ data: PropertyItem[] }>("/properties", {
+        query: {
+          is_active: params?.is_active ?? 1,
+          per_page: params?.per_page ?? 25,
+          page: params?.page ?? 1,
+        },
+      });
       return res.data ?? [];
     },
+
     floors: async (propertyId: number) => {
       if (isReviewer()) {
         return [{ id: 1, name: "Ground Floor" }, { id: 2, name: "5th Floor" }];
