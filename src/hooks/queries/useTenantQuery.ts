@@ -97,7 +97,7 @@ export function useTenants() {
 
     // Client-side: sort (only run client-side if in mock/reviewer mode or for unsupported backend fields like 'createdAt')
     const user = useAuthStore.getState().user;
-    const isReviewer = user?.email?.toLowerCase().trim() === "reviewer@kadertower.com";
+    const isReviewer = user?.email?.toLowerCase().trim() === "john.doe@gmail.com";
     const shouldSortClientSide = isReviewer || sortBy === "createdAt";
 
     if (shouldSortClientSide) {

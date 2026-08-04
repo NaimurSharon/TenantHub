@@ -29,7 +29,7 @@ import {
 const isReviewer = (): boolean => {
   try {
     const user = useAuthStore.getState().user;
-    return user?.email?.toLowerCase().trim() === "reviewer@kadertower.com";
+    return user?.email?.toLowerCase().trim() === "john.doe@gmail.com";
   } catch {
     return false;
   }
@@ -39,13 +39,13 @@ export const api = {
   auth: {
     login: async (email: string, password: string) => {
       const cleanEmail = email.toLowerCase().trim();
-      if (cleanEmail === "reviewer@kadertower.com") {
+      if (cleanEmail === "john.doe@gmail.com" && password === "12345678") {
         return {
           token: "mock-reviewer-token",
           user: {
             id: 9999,
-            name: "Reviewer Mode",
-            email: "reviewer@kadertower.com",
+            name: "John Doe",
+            email: "john.doe@gmail.com",
           },
         };
       }
@@ -60,8 +60,8 @@ export const api = {
         return {
           data: {
             id: 9999,
-            name: "Reviewer Mode",
-            email: "reviewer@kadertower.com",
+            name: "John Doe",
+            email: "john.doe@gmail.com",
           },
         };
       }
@@ -428,9 +428,13 @@ export const api = {
       if (isReviewer()) {
         const newAcc = {
           id: Date.now(),
-          ...input,
+          bank_name: input.bank_name,
+          account_name: input.account_name || input.bank_name,
+          account_no: input.account_no,
+          branch_name: input.branch_name || "Main Branch",
           current_balance: input.current_balance ?? 0,
           currency: "AED",
+          is_active: true,
         };
         MOCK_BANK_ACCOUNTS.push(newAcc);
         return newAcc;
