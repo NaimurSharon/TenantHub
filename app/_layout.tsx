@@ -27,10 +27,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === "login";
-    if (!isAuthenticated && !inAuthGroup) {
+    const isPublicRoute = segments[0] === "login" || segments[0] === "privacy-policy";
+    if (!isAuthenticated && !isPublicRoute) {
       router.replace("/login");
-    } else if (isAuthenticated && inAuthGroup) {
+    } else if (isAuthenticated && segments[0] === "login") {
       router.replace("/hub-selector");
     }
   }, [isAuthenticated, segments]);
@@ -74,6 +74,7 @@ export default function RootLayout() {
                 }}
               >
                 <Stack.Screen name="login" options={{ animation: "fade" }} />
+                <Stack.Screen name="privacy-policy" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="hub-selector" options={{ animation: "fade" }} />
                 <Stack.Screen name="financial-hub" options={{ animation: "slide_from_right" }} />
                 <Stack.Screen name="daily-reports" options={{ animation: "slide_from_right" }} />

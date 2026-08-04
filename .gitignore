@@ -11,9 +11,10 @@ web-build/
 .env
 .env.local
 /api
+.agents
 
 # Store submission secrets
 service-account.json
 google-services.json
 GoogleService-Info.plist
-credentials.json
+credentials.json

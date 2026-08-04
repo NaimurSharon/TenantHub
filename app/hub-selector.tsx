@@ -87,7 +87,7 @@ export default function HubSelectorScreen() {
           <Text style={styles.welcomeLabel}>Welcome Back,</Text>
           <Text style={styles.userName}>{user?.name || "Administrator"}</Text>
           <Text style={styles.welcomeSub}>
-            Select a hub to manage PM System properties
+            Select a hub to manage PM System
           </Text>
         </View>
 
