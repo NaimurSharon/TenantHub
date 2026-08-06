@@ -357,7 +357,7 @@ function ContactsTab({
 
   return (
     <View>
-      {/* Add button */}
+      {/* DISABLE_CREATE: Uncomment to re-enable contact creation
       {!showForm && (
         <Pressable
           onPress={() => setShowForm(true)}
@@ -367,6 +367,7 @@ function ContactsTab({
           <Text style={styles.addContactText}>Add Contact</Text>
         </Pressable>
       )}
+      */}
 
       {/* Form */}
       {showForm && (

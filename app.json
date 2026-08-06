@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kadertower.app",
-      "buildNumber": "3",
+      "buildNumber": "21",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "PM System uses the camera to capture documents and photos for property records.",
@@ -53,7 +53,7 @@
     },
     "android": {
       "package": "com.kadertower.app",
-      "versionCode": 3,
+      "versionCode": 21,
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

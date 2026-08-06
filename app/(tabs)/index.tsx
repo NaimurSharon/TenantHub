@@ -132,9 +132,12 @@ export default function TenantsScreen() {
             </View>
           ) : null}
         </View>
+        {/* DISABLE_CREATE: Uncomment to re-enable tenant creation
         <Pressable onPress={handleAddNew} hitSlop={12} style={styles.addNewHeaderBtn}>
           <Plus size={20} color={colors.primary} strokeWidth={2.5} />
         </Pressable>
+        */}
+        <View style={{ width: 28 }} />
       </View>
 
       {/* ── Status Toggle ──────────────────────────────────── */}

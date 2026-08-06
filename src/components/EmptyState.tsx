@@ -11,7 +11,7 @@ interface EmptyStateProps {
 
 export function EmptyState({
   title = "No tenants found",
-  message = "Try adjusting your filters or add a new tenant.",
+  message = "Try adjusting your filters.",
 }: EmptyStateProps) {
   return (
     <View style={styles.container}>

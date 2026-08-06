@@ -105,6 +105,7 @@ export function BankSidebar({
       <ScreenHeader
         title="FINANCIAL HUB"
         onBack={onBack}
+        /* DISABLE_CREATE: Uncomment to re-enable bank account creation
         rightAction={
           <Pressable
             onPress={() => {
@@ -117,6 +118,7 @@ export function BankSidebar({
             <Plus size={20} color={colors.primary} strokeWidth={2.5} />
           </Pressable>
         }
+        */
       />
 
       {/* Active / Inactive toggle */}

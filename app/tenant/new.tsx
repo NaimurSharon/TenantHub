@@ -2,8 +2,10 @@
  * Add New Tenant — form matching the real POST /customers API.
  * Required: display_name, customer_type
  * Optional: contact_person, email, phone, address, national_id_no, trade_license_no
+ * 
+ * DISABLE_CREATE: To re-enable tenant creation, set ENABLE_TENANT_CREATION = true.
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -25,6 +27,8 @@ import { colors, fonts, radii } from "@/theme";
 import { useCreateTenant } from "@/hooks/queries/useTenantQuery";
 import { createTenantSchema } from "@/lib/validation";
 
+const ENABLE_TENANT_CREATION = false;
+
 const CUSTOMER_TYPES = [
   { key: "individual", label: "Individual" },
   { key: "company", label: "Company" },
@@ -34,6 +38,12 @@ export default function AddTenantScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const createMutation = useCreateTenant();
+
+  useEffect(() => {
+    if (!ENABLE_TENANT_CREATION) {
+      router.back();
+    }
+  }, [router]);
 
   const [form, setForm] = useState({
     display_name: "",
@@ -46,6 +56,10 @@ export default function AddTenantScreen() {
     trade_license_no: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  if (!ENABLE_TENANT_CREATION) {
+    return null;
+  }
 
   const updateField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -75,7 +89,6 @@ export default function AddTenantScreen() {
       return;
     }
 
-    // Strip undefined values so we only send non-empty fields
     const payload = Object.fromEntries(
       Object.entries(parsed.data).filter(([_, v]) => v !== undefined && v !== "")
     );
@@ -117,7 +130,6 @@ export default function AddTenantScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.screen}
     >
-      {/* Header */}
       <ScreenHeader
         title="Add New Tenant"
         onBack={() => router.back()}
@@ -129,7 +141,6 @@ export default function AddTenantScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Customer Type Toggle */}
         <View style={styles.fieldContainer}>
           <Text style={styles.fieldLabel}>Type *</Text>
           <View style={styles.typeRow}>
@@ -155,7 +166,6 @@ export default function AddTenantScreen() {
           </View>
         </View>
 
-        {/* Name Fields */}
         <Input
           label="Display Name *"
           placeholder="e.g. Acme Corporation or Rowshon Ali"
@@ -218,7 +228,6 @@ export default function AddTenantScreen() {
           />
         )}
 
-        {/* Save Button */}
         <Button
           onPress={handleSave}
           loading={createMutation.isPending}
